@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="manual">
+    <!--This xml file is made for testing the basic functions of TransitGraph-->
+    <bounds minlon="0" minlat="0" maxlon="1" maxlat="1"/>
+
+    <!--Nodes-->
+    <node id="0" version="3" timestamp="2014-04-21T10:27:58Z" uid="0" user="somebody" changeset="0" lat="0.0000" lon="0.0000"/>
+    <node id="1" version="3" timestamp="2014-04-21T10:27:58Z" uid="1" user="somebody" changeset="0" lat="0.0001" lon="0.0000"/>
+    <node id="2" version="3" timestamp="2014-04-21T10:27:58Z" uid="2" user="somebody" changeset="0" lat="0.0002" lon="0.0000"/>
+    <node id="3" version="3" timestamp="2014-04-21T10:27:58Z" uid="3" user="somebody" changeset="0" lat="0.0003" lon="0.0000"/>
+    <node id="4" version="3" timestamp="2014-04-21T10:27:58Z" uid="4" user="somebody" changeset="0" lat="0.0004" lon="0.0000"/>
+    <node id="5" version="3" timestamp="2014-04-21T10:27:58Z" uid="5" user="somebody" changeset="0" lat="0.0005" lon="0.0000"/>
+
+    <node id="6" version="3" timestamp="2014-04-21T10:27:58Z" uid="6" user="somebody" changeset="0" lat="0.0000" lon="0.0050"/>
+    <node id="7" version="3" timestamp="2014-04-21T10:27:58Z" uid="7" user="somebody" changeset="0" lat="0.0001" lon="0.0050"/>
+    <node id="8" version="3" timestamp="2014-04-21T10:27:58Z" uid="8" user="somebody" changeset="0" lat="0.0002" lon="0.0050"/>
+    <node id="9" version="3" timestamp="2014-04-21T10:27:58Z" uid="9" user="somebody" changeset="0" lat="0.0003" lon="0.0050"/>
+    <node id="10" version="3" timestamp="2014-04-21T10:27:58Z" uid="10" user="somebody" changeset="0" lat="0.0004" lon="0.0050"/>
+    <node id="11" version="3" timestamp="2014-04-21T10:27:58Z" uid="11" user="somebody" changeset="0" lat="0.0005" lon="0.0050"/>
+
+    <node id="12" version="3" timestamp="2014-04-21T10:27:58Z" uid="12" user="somebody" changeset="0" lat="0.0000" lon="0.0100"/>
+    <node id="13" version="3" timestamp="2014-04-21T10:27:58Z" uid="13" user="somebody" changeset="0" lat="0.0001" lon="0.0100"/>
+    <node id="14" version="3" timestamp="2014-04-21T10:27:58Z" uid="14" user="somebody" changeset="0" lat="0.0002" lon="0.0100"/>
+    <node id="15" version="3" timestamp="2014-04-21T10:27:58Z" uid="15" user="somebody" changeset="0" lat="0.0003" lon="0.0100"/>
+    <node id="16" version="3" timestamp="2014-04-21T10:27:58Z" uid="16" user="somebody" changeset="0" lat="0.0004" lon="0.0100"/>
+    <node id="17" version="3" timestamp="2014-04-21T10:27:58Z" uid="17" user="somebody" changeset="0" lat="0.0005" lon="0.0100"/>
+
+    <node id="18" version="3" timestamp="2014-04-21T10:27:58Z" uid="18" user="somebody" changeset="0" lat="0.0000" lon="0.0150"/>
+    <node id="19" version="3" timestamp="2014-04-21T10:27:58Z" uid="19" user="somebody" changeset="0" lat="0.0001" lon="0.0150"/>
+    <node id="20" version="3" timestamp="2014-04-21T10:27:58Z" uid="20" user="somebody" changeset="0" lat="0.0002" lon="0.0150"/>
+    <node id="21" version="3" timestamp="2014-04-21T10:27:58Z" uid="21" user="somebody" changeset="0" lat="0.0003" lon="0.0150"/>
+    <node id="22" version="3" timestamp="2014-04-21T10:27:58Z" uid="22" user="somebody" changeset="0" lat="0.0004" lon="0.0150"/>
+    <node id="23" version="3" timestamp="2014-04-21T10:27:58Z" uid="23" user="somebody" changeset="0" lat="0.0005" lon="0.0150"/>
+
+    <node id="24" version="3" timestamp="2014-04-21T10:27:58Z" uid="24" user="somebody" changeset="0" lat="0.00001" lon="0.00001"/>
+    <node id="25" version="3" timestamp="2014-04-21T10:27:58Z" uid="25" user="somebody" changeset="0" lat="0.00029" lon="0.00499"/>
+    <node id="26" version="3" timestamp="2014-04-21T10:27:58Z" uid="26" user="somebody" changeset="0" lat="0.00009" lon="0.00999"/>
+    <node id="27" version="3" timestamp="2014-04-21T10:27:58Z" uid="27" user="somebody" changeset="0" lat="0.00029" lon="0.01499"/>
+
+    <!--Ways-->
+    <way id="10000" version="6" timestamp="2014-04-21T10:27:58Z" uid="10000" user="somebody" changeset="0">
+        <nd ref="0"/>
+        <nd ref="1"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way1"/>
+    </way>
+    <way id="10001" version="6" timestamp="2014-04-21T10:27:58Z" uid="10001" user="somebody" changeset="0">
+        <nd ref="1"/>
+        <nd ref="2"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way1"/>
+    </way>
+    <way id="10002" version="6" timestamp="2014-04-21T10:27:58Z" uid="10002" user="somebody" changeset="0">
+        <nd ref="2"/>
+        <nd ref="3"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way2"/>
+    </way>
+    <way id="10003" version="6" timestamp="2014-04-21T10:27:58Z" uid="10003" user="somebody" changeset="0">
+        <nd ref="3"/>
+        <nd ref="4"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way3"/>
+    </way>
+    <way id="10004" version="6" timestamp="2014-04-21T10:27:58Z" uid="10004" user="somebody" changeset="0">
+        <nd ref="4"/>
+        <nd ref="5"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way4"/>
+    </way>
+
+    <way id="10005" version="6" timestamp="2014-04-21T10:27:58Z" uid="10005" user="somebody" changeset="0">
+        <nd ref="6"/>
+        <nd ref="7"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way5"/>
+    </way>
+    <way id="10006" version="6" timestamp="2014-04-21T10:27:58Z" uid="10006" user="somebody" changeset="0">
+        <nd ref="7"/>
+        <nd ref="8"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way6"/>
+    </way>
+    <way id="10007" version="6" timestamp="2014-04-21T10:27:58Z" uid="10007" user="somebody" changeset="0">
+        <nd ref="8"/>
+        <nd ref="9"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way7"/>
+    </way>
+    <way id="10008" version="6" timestamp="2014-04-21T10:27:58Z" uid="10008" user="somebody" changeset="0">
+        <nd ref="9"/>
+        <nd ref="10"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way8"/>
+    </way>
+    <way id="10009" version="6" timestamp="2014-04-21T10:27:58Z" uid="10009" user="somebody" changeset="0">
+        <nd ref="10"/>
+        <nd ref="11"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way9"/>
+    </way>
+
+    <way id="10010" version="6" timestamp="2014-04-21T10:27:58Z" uid="10010" user="somebody" changeset="0">
+        <nd ref="12"/>
+        <nd ref="13"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way10"/>
+    </way>
+    <way id="10011" version="6" timestamp="2014-04-21T10:27:58Z" uid="10011" user="somebody" changeset="0">
+        <nd ref="13"/>
+        <nd ref="14"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way11"/>
+    </way>
+    <way id="10012" version="6" timestamp="2014-04-21T10:27:58Z" uid="10012" user="somebody" changeset="0">
+        <nd ref="14"/>
+        <nd ref="15"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way12"/>
+    </way>
+    <way id="10013" version="6" timestamp="2014-04-21T10:27:58Z" uid="10013" user="somebody" changeset="0">
+        <nd ref="15"/>
+        <nd ref="16"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way13"/>
+    </way>
+    <way id="100014" version="6" timestamp="2014-04-21T10:27:58Z" uid="10014" user="somebody" changeset="0">
+        <nd ref="16"/>
+        <nd ref="17"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way14"/>
+    </way>
+
+    <way id="10015" version="6" timestamp="2014-04-21T10:27:58Z" uid="10015" user="somebody" changeset="0">
+        <nd ref="19"/>
+        <nd ref="18"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way15"/>
+    </way>
+    <way id="10016" version="6" timestamp="2014-04-21T10:27:58Z" uid="10016" user="somebody" changeset="0">
+        <nd ref="20"/>
+        <nd ref="19"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way16"/>
+    </way>
+    <way id="10017" version="6" timestamp="2014-04-21T10:27:58Z" uid="10017" user="somebody" changeset="0">
+        <nd ref="21"/>
+        <nd ref="20"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way17"/>
+    </way>
+    <way id="10018" version="6" timestamp="2014-04-21T10:27:58Z" uid="10018" user="somebody" changeset="0">
+        <nd ref="22"/>
+        <nd ref="21"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way18"/>
+    </way>
+    <way id="10019" version="6" timestamp="2014-04-21T10:27:58Z" uid="10019" user="somebody" changeset="0">
+        <nd ref="23"/>
+        <nd ref="22"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way19"/>
+    </way>
+
+    <way id="10020" version="6" timestamp="2014-04-21T10:27:58Z" uid="10020" user="somebody" changeset="0">
+        <nd ref="1"/>
+        <nd ref="8"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way20"/>
+    </way>
+    <way id="10021" version="6" timestamp="2014-04-21T10:27:58Z" uid="10021" user="somebody" changeset="0">
+        <nd ref="8"/>
+        <nd ref="15"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way21"/>
+    </way>
+    <way id="10022" version="6" timestamp="2014-04-21T10:27:58Z" uid="10022" user="somebody" changeset="0">
+        <nd ref="15"/>
+        <nd ref="22"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way22"/>
+    </way>
+
+    <way id="10023" version="6" timestamp="2014-04-21T10:27:58Z" uid="10023" user="somebody" changeset="0">
+        <nd ref="24"/>
+        <nd ref="25"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way23"/>
+    </way>
+    <way id="10024" version="6" timestamp="2014-04-21T10:27:58Z" uid="10024" user="somebody" changeset="0">
+        <nd ref="25"/>
+        <nd ref="26"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way24"/>
+    </way>
+    <way id="10025" version="6" timestamp="2014-04-21T10:27:58Z" uid="10025" user="somebody" changeset="0">
+        <nd ref="26"/>
+        <nd ref="27"/>
+        <tag k="highway" v="primary"/>
+        <tag k="name" v="way25"/>
+    </way>
+
+    <!--Relations-->
+    <relation id="100000" version="14" timestamp="2014-04-21T10:27:58Z" uid="100000" user="somebody" changeset="0">
+        <member type="way" ref="10000" role="forward"/>
+        <member type="way" ref="10001" role="forward"/>
+        <member type="way" ref="10002" role="forward"/>
+        <member type="way" ref="10003" role="forward"/>
+        <member type="way" ref="10004" role="forward"/>
+        <member type="node" ref="0" role="stop"/>
+        <member type="node" ref="1" role="stop"/>
+        <member type="node" ref="2" role="stop"/>
+        <member type="node" ref="3" role="stop"/>
+        <member type="node" ref="4" role="stop"/>
+        <member type="node" ref="5" role="stop"/>
+        <tag k="type" v="route"/>
+        <tag k="name" v="transit0"/>
+        <tag k="route" v="bus"/>
+    </relation>
+    <relation id="100001" version="14" timestamp="2014-04-21T10:27:58Z" uid="100001" user="somebody" changeset="0">
+        <member type="way" ref="10005" role="forward"/>
+        <member type="way" ref="10006" role="forward"/>
+        <member type="way" ref="10007" role="forward"/>
+        <member type="way" ref="10008" role="forward"/>
+        <member type="way" ref="10009" role="forward"/>
+        <member type="node" ref="6" role="stop"/>
+        <member type="node" ref="7" role="stop"/>
+        <member type="node" ref="8" role="stop"/>
+        <member type="node" ref="9" role="stop"/>
+        <member type="node" ref="10" role="stop"/>
+        <member type="node" ref="11" role="stop"/>
+        <tag k="type" v="route"/>
+        <tag k="name" v="transit1"/>
+        <tag k="route" v="bus"/>
+    </relation>
+    <relation id="100002" version="14" timestamp="2014-04-21T10:27:58Z" uid="100002" user="somebody" changeset="0">
+        <member type="way" ref="10010" role="forward"/>
+        <member type="way" ref="10011" role="forward"/>
+        <member type="way" ref="10012" role="forward"/>
+        <member type="way" ref="10013" role="forward"/>
+        <member type="way" ref="10014" role="forward"/>
+        <member type="node" ref="12" role="stop"/>
+        <member type="node" ref="13" role="stop"/>
+        <member type="node" ref="14" role="stop"/>
+        <member type="node" ref="15" role="stop"/>
+        <member type="node" ref="16" role="stop"/>
+        <member type="node" ref="17" role="stop"/>
+        <tag k="type" v="route"/>
+        <tag k="name" v="transit2"/>
+        <tag k="route" v="bus"/>
+    </relation>
+    <relation id="100003" version="14" timestamp="2014-04-21T10:27:58Z" uid="100003" user="somebody" changeset="0">
+        <member type="way" ref="10015" role="forward"/>
+        <member type="way" ref="10016" role="forward"/>
+        <member type="way" ref="10017" role="forward"/>
+        <member type="way" ref="10018" role="forward"/>
+        <member type="way" ref="10019" role="forward"/>
+        <member type="node" ref="18" role="stop"/>
+        <member type="node" ref="19" role="stop"/>
+        <member type="node" ref="20" role="stop"/>
+        <member type="node" ref="21" role="stop"/>
+        <member type="node" ref="22" role="stop"/>
+        <member type="node" ref="23" role="stop"/>
+        <tag k="type" v="route"/>
+        <tag k="name" v="transit3"/>
+        <tag k="route" v="bus"/>
+    </relation>
+    <relation id="100004" version="14" timestamp="2014-04-21T10:27:58Z" uid="100004" user="somebody" changeset="0">
+        <member type="way" ref="10020" role="forward"/>
+        <member type="way" ref="10021" role="forward"/>
+        <member type="way" ref="10022" role="forward"/>
+        <member type="node" ref="1" role="stop"/>
+        <member type="node" ref="8" role="stop"/>
+        <member type="node" ref="15" role="stop"/>
+        <member type="node" ref="22" role="stop"/>
+        <tag k="type" v="route"/>
+        <tag k="name" v="transit4"/>
+        <tag k="route" v="bus"/>
+    </relation>
+    <relation id="100005" version="14" timestamp="2014-04-21T10:27:58Z" uid="100005" user="somebody" changeset="0">
+        <member type="way" ref="10023" role="forward"/>
+        <member type="way" ref="10024" role="forward"/>
+        <member type="way" ref="10025" role="forward"/>
+        <member type="node" ref="24" role="stop"/>
+        <member type="node" ref="25" role="stop"/>
+        <member type="node" ref="26" role="stop"/>
+        <member type="node" ref="27" role="stop"/>
+        <tag k="type" v="route"/>
+        <tag k="name" v="transit5"/>
+        <tag k="route" v="bus"/>
+    </relation>
+</osm>
