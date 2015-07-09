@@ -1,6 +1,6 @@
 package com.mitsubishi.simulation.input.route;
 
-import com.mitsubishi.simulation.input.transit.TransitStop;
+import com.mitsubishi.simulation.input.transit.TransitStation;
 
 import java.util.List;
 
@@ -13,8 +13,8 @@ public class TransitRoute {
     private double walkingDistance1;
     private double walkingDistance2;
     private double totalWalkingDistance;
-    private TransitStop fromStop;
-    private TransitStop toStop;
+    private TransitStation fromStop;
+    private TransitStation toStop;
     private List<TransitTrip> trips;
 
     public TransitRoute(double walkingDistance1, double walkingDistance2, List<TransitTrip> trips) {
@@ -23,14 +23,14 @@ public class TransitRoute {
         this.totalWalkingDistance = walkingDistance1 + walkingDistance2;
         this.trips = trips;
         if (trips.size() > 0) {
-            this.fromStop = trips.get(0).getFromStop();
-            this.toStop = trips.get(trips.size() - 1).getToStop();
+            this.fromStop = trips.get(0).getFromStation();
+            this.toStop = trips.get(trips.size() - 1).getToStation();
             // calculate total walking distance
             int size = trips.size();
             for (int i = 0; i < size - 1; i++) {
                 TransitTrip trip1 = trips.get(i);
                 TransitTrip trip2 = trips.get(i + 1);
-                totalWalkingDistance += trip1.getToStop().getDistanceFrom(trip2.getFromStop());
+                totalWalkingDistance += trip1.getToStation().getDistanceFrom(trip2.getFromStation());
             }
         }
         // score this route
@@ -49,11 +49,11 @@ public class TransitRoute {
         return walkingDistance2;
     }
 
-    public TransitStop getFromStop() {
+    public TransitStation getFromStop() {
         return fromStop;
     }
 
-    public TransitStop getToStop() {
+    public TransitStation getToStop() {
         return toStop;
     }
 

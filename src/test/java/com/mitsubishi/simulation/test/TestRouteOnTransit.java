@@ -31,7 +31,7 @@ public class TestRouteOnTransit {
         );
         OSMRelationTransitAdapter adapter = new OSMRelationTransitAdapter(TestConstants.OSM_TEST_INPUT, network);
         this.graph = new TransitGraph(
-                adapter.getTransits(), adapter.getTransitStops(), TestConstants.DISTANCE_VERY_SMALL
+                adapter.getTransits(), adapter.getTransitStations(), TestConstants.DISTANCE_VERY_SMALL
         );
         this.routeOnTransit = new RouteOnTransit(this.graph);
     }

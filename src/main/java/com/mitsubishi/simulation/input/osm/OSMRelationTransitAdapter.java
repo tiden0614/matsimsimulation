@@ -1,8 +1,9 @@
 package com.mitsubishi.simulation.input.osm;
 
 import com.mitsubishi.simulation.input.transit.Transit;
-import com.mitsubishi.simulation.input.transit.TransitStop;
+import com.mitsubishi.simulation.input.transit.TransitStation;
 import com.mitsubishi.simulation.input.transit.TransitAdapter;
+import com.mitsubishi.simulation.input.transit.TransitStop;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -11,7 +12,6 @@ import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.basic.v01.IdImpl;
 
 import java.io.FileInputStream;
-import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -24,7 +24,7 @@ public class OSMRelationTransitAdapter implements TransitAdapter {
     private Network network;
     private List<OSMRelation> relations;
     private List<Transit> transits;
-    private Map<Id, TransitStop> transitStops;
+    private Map<Id, TransitStation> transitStations;
     // unfortunately we cannot get the inner ID generator of Matsim network
     // although it is possible to access the ID generator by reflection
     // it is dangerous to do so since the IDs may crush in someway
@@ -44,7 +44,7 @@ public class OSMRelationTransitAdapter implements TransitAdapter {
     public OSMRelationTransitAdapter(String filename, Network network) {
         this.network = network;
         this.transits = new ArrayList<Transit>();
-        this.transitStops = new HashMap<Id, TransitStop>();
+        this.transitStations = new HashMap<Id, TransitStation>();
         logger.info("Converting OSMRelations into Transits...");
         try {
             // only extract public transport relations
@@ -111,19 +111,20 @@ public class OSMRelationTransitAdapter implements TransitAdapter {
         Transit t = new Transit(type, name);
         List<TransitStop> stops = t.getStops();
         // cache the stops in case we decide not to add new stops into the map
-        Map<Id, TransitStop> stopsToAdd = new HashMap<Id, TransitStop>();
+        Map<Id, TransitStation> stationsToAdd = new HashMap<Id, TransitStation>();
         // add stops to the transit
-        for (Node node : nodes) {
+        for (int i = 0; i < nodes.size(); i++) {
+            Node node = nodes.get(i);
             Id nodeId = node.getId();
-            TransitStop stop = transitStops.get(nodeId);
-            if (stop == null) {
-                stop = stopsToAdd.get(nodeId);
+            TransitStation station = transitStations.get(nodeId);
+            if (station == null) {
+                station = stationsToAdd.get(nodeId);
             }
-            if (stop == null) {
-                stop = new TransitStop(node);
-                stopsToAdd.put(nodeId, stop);
+            if (station == null) {
+                station = new TransitStation(node);
+                stationsToAdd.put(nodeId, station);
             }
-            stops.add(stop);
+            stops.add(new TransitStop(station, i));
         }
         int size = stops.size();
         // we do not need transits that have only one stop or not at all
@@ -132,15 +133,15 @@ public class OSMRelationTransitAdapter implements TransitAdapter {
         }
         // let all stops of this transit know that they are passed through by this transit
         for (TransitStop stop : t.getStops()) {
-            stop.getPassThroughs().add(t);
+            stop.getStation().getPassThroughTransitMap().put(t, stop);
         }
         // add cached stops to the map
-        transitStops.putAll(stopsToAdd);
+        transitStations.putAll(stationsToAdd);
         // add links to the transit
         List<Link> links = t.getLinks();
         for (int j = 0; j < size - 1; j++) {
-            Node from = stops.get(j).getNode();
-            Node to = stops.get(j + 1).getNode();
+            Node from = stops.get(j).getStation().getNode();
+            Node to = stops.get(j + 1).getStation().getNode();
             // find if there is a link connecting stops
             Link connection = null;
             for (Link l : from.getOutLinks().values()) {
@@ -165,9 +166,9 @@ public class OSMRelationTransitAdapter implements TransitAdapter {
         return transits;
     }
 
-    public List<TransitStop> getTransitStops() {
-        List<TransitStop> transitStopList = new ArrayList<TransitStop>();
-        transitStopList.addAll(transitStops.values());
-        return transitStopList;
+    public List<TransitStation> getTransitStations() {
+        List<TransitStation> transitStationList = new ArrayList<TransitStation>();
+        transitStationList.addAll(transitStations.values());
+        return transitStationList;
     }
 }

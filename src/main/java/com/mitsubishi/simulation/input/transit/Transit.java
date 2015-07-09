@@ -1,7 +1,6 @@
 package com.mitsubishi.simulation.input.transit;
 
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Node;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -21,7 +20,7 @@ public class Transit {
     private List<TransitStop> stops;
     private List<Link> links;
     // used to store edges in an directed graph
-    private Map<String, List<Transfer>> possibleTransfers;
+    private Map<String, List<Transfer>> possibleTransferMap;
 
     // The use of default constructor is forbidden
     private Transit() {}
@@ -31,7 +30,7 @@ public class Transit {
         this.name = name;
         this.stops = new ArrayList<TransitStop>();
         this.links = new ArrayList<Link>();
-        this.possibleTransfers = new LinkedHashMap<String, List<Transfer>>();
+        this.possibleTransferMap = new LinkedHashMap<String, List<Transfer>>();
     }
 
     public String getType() {
@@ -54,8 +53,24 @@ public class Transit {
         return links;
     }
 
-    public Map<String, List<Transfer>> getPossibleTransfers() {
-        return possibleTransfers;
+    public Map<String, List<Transfer>> getPossibleTransferMap() {
+        return possibleTransferMap;
+    }
+
+    /**
+     * Compute possible transfers when starting from a particular station
+     * @param currentStation the starting station
+     * @return possible transfers
+     */
+    public List<Transfer> computeForwardPossibleTransfers(TransitStation currentStation) {
+        List<Transfer> transfers = new ArrayList<Transfer>();
+        int stopIndex = stops.indexOf(currentStation);
+
+        // the argument should really be one of the stops of this transit
+        assert -1 < stopIndex;
+
+
+        return transfers;
     }
 
     @Override

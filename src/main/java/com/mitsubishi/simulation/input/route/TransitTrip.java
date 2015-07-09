@@ -1,29 +1,29 @@
 package com.mitsubishi.simulation.input.route;
 
 import com.mitsubishi.simulation.input.transit.Transit;
-import com.mitsubishi.simulation.input.transit.TransitStop;
+import com.mitsubishi.simulation.input.transit.TransitStation;
 
 /**
  * Created by tiden on 7/8/2015.
  * This class represents one trip in a route
  */
 public class TransitTrip {
-    private TransitStop fromStop;
-    private TransitStop toStop;
+    private TransitStation fromStation;
+    private TransitStation toStation;
     private Transit transit;
 
-    public TransitTrip(TransitStop fromStop, TransitStop toStop, Transit transit) {
-        this.fromStop = fromStop;
-        this.toStop = toStop;
+    public TransitTrip(TransitStation fromStation, TransitStation toStation, Transit transit) {
+        this.fromStation = fromStation;
+        this.toStation = toStation;
         this.transit = transit;
     }
 
-    public TransitStop getFromStop() {
-        return fromStop;
+    public TransitStation getFromStation() {
+        return fromStation;
     }
 
-    public TransitStop getToStop() {
-        return toStop;
+    public TransitStation getToStation() {
+        return toStation;
     }
 
     public Transit getTransit() {

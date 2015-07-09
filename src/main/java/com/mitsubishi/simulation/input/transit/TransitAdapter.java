@@ -1,10 +1,5 @@
 package com.mitsubishi.simulation.input.transit;
 
-import com.mitsubishi.simulation.input.transit.Transit;
-import com.mitsubishi.simulation.input.transit.TransitStop;
-import org.matsim.core.utils.collections.QuadTree;
-
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -14,5 +9,5 @@ import java.util.List;
  */
 public interface TransitAdapter {
     List<Transit> getTransits();
-    List<TransitStop> getTransitStops();
+    List<TransitStation> getTransitStations();
 }

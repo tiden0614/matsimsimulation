@@ -3,7 +3,7 @@ package com.mitsubishi.simulation.input.route;
 import com.mitsubishi.simulation.input.transit.Transfer;
 import com.mitsubishi.simulation.input.transit.Transit;
 import com.mitsubishi.simulation.input.transit.TransitGraph;
-import com.mitsubishi.simulation.input.transit.TransitStop;
+import com.mitsubishi.simulation.input.transit.TransitStation;
 import org.apache.log4j.Logger;
 
 import java.util.*;
@@ -24,21 +24,21 @@ public class RouteOnTransit {
 
     public List<TransitRoute> getRoutes(double x1, double y1, double x2, double y2) {
         List<TransitRoute> routes = new ArrayList<TransitRoute>();
-        Collection<TransitStop> startStops = null;
+        Collection<TransitStation> startStops = null;
         double walkingDistance1;
         for (int i = 0; i < searchDistances.length && (startStops == null || startStops.size() == 0); i++) {
             walkingDistance1 = searchDistances[i];
-            startStops = graph.getStops().get(x1, y1, walkingDistance1);
+            startStops = graph.getStations().get(x1, y1, walkingDistance1);
         }
         // cannot find a start stop for the start location
         if (startStops == null || startStops.size() == 0) {
             return routes;
         }
-        Collection<TransitStop> endStops = null;
+        Collection<TransitStation> endStops = null;
         double walkingDistance2;
         for (int i = 0; i < searchDistances.length && (endStops == null || endStops.size() == 0); i++) {
             walkingDistance2 = searchDistances[i];
-            endStops = graph.getStops().get(x2, y2, walkingDistance2);
+            endStops = graph.getStations().get(x2, y2, walkingDistance2);
         }
         // cannot find an end stop for the end location
         if (endStops == null || endStops.size() == 0) {
@@ -73,7 +73,7 @@ public class RouteOnTransit {
             }
             boolean foundNextMove = false;
             // find possible transfers that has not been visited
-            for (List<Transfer> transfers : currentTransit.getPossibleTransfers().values()) {
+            for (List<Transfer> transfers : currentTransit.getPossibleTransferMap().values()) {
                 if (transfers.size() > 0 && !transitSet.contains(transfers.get(0).getToTransit())) {
                     Transit next = transfers.get(0).getToTransit();
                     transitSet.add(next);
@@ -91,22 +91,22 @@ public class RouteOnTransit {
         }
 
         List<TransitTrip> trips = new ArrayList<TransitTrip>();
-        TransitStop lastStop = null;
+        TransitStation lastStation = null;
         for (int i = 0; i < transitStack.size() - 1; i++) {
             Transit t1 = transitStack.elementAt(i);
             Transit t2 = transitStack.elementAt(i + 1);
-            List<Transfer> transfers = t1.getPossibleTransfers().get(t2.getName());
+            List<Transfer> transfers = t1.getPossibleTransferMap().get(t2.getName());
             // if we have entered this loop, it means that we found a path
             // and the transfer list cannot be null or empty
             assert transfers != null;
             assert transfers.size() > 0;
-            TransitStop toStop = transfers.get(0).getToStop();
+            TransitStation toStation = transfers.get(0).getToStop().getStation();
             // transfer at the first possible stop
-            trips.add(new TransitTrip(lastStop, toStop, t1));
-            lastStop = toStop;
+            trips.add(new TransitTrip(lastStation, toStation, t1));
+            lastStation = toStation;
         }
         if (transitStack.size() > 0) {
-            trips.add(new TransitTrip(lastStop, null, end));
+            trips.add(new TransitTrip(lastStation, null, end));
         }
         return trips;
     }

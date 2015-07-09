@@ -16,8 +16,6 @@ import static org.junit.Assert.assertTrue;
  * Test the function of the XML parser
  */
 public class TestOSMRelationXMLParser {
-    private String testOSMFile = "testinput/test-osm-basic.xml";
-
     @Test
     public void testOSMRelationParser() throws Exception {
         List<OSMRelation> relationList = new ArrayList<OSMRelation>();
@@ -25,7 +23,7 @@ public class TestOSMRelationXMLParser {
         filter.put("type", "route");
         filter.put("route", new String[]{"bus", "train"});
         OSMRelationXMLParser parser = new OSMRelationXMLParser(relationList, filter);
-        parser.parse(testOSMFile);
+        parser.parse(TestConstants.OSM_TEST_INPUT);
         assertTrue(relationList.size() > 0);
     }
 }

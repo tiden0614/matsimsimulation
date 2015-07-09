@@ -4,7 +4,7 @@ import com.mitsubishi.simulation.input.network.NetworkUtils;
 import com.mitsubishi.simulation.input.osm.OSMRelationTransitAdapter;
 import com.mitsubishi.simulation.input.transit.Transit;
 import com.mitsubishi.simulation.input.transit.TransitGraph;
-import com.mitsubishi.simulation.input.transit.TransitStop;
+import com.mitsubishi.simulation.input.transit.TransitStation;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.api.core.v01.network.Network;
@@ -24,7 +24,7 @@ public class TestTransitGraph {
 
 
     private List<Transit> transits;
-    private List<TransitStop> stops;
+    private List<TransitStation> stops;
 
     @Before
     public void setup() {
@@ -33,7 +33,7 @@ public class TestTransitGraph {
         );
         OSMRelationTransitAdapter adapter = new OSMRelationTransitAdapter(TestConstants.OSM_TEST_INPUT, network);
         transits = adapter.getTransits();
-        stops = adapter.getTransitStops();
+        stops = adapter.getTransitStations();
     }
 
     @Test
@@ -45,17 +45,17 @@ public class TestTransitGraph {
 
         Transit transit0 = transitMap.get("transit0");
         assertTrue("transit0 should have 2 possible transfers",
-                transit0.getPossibleTransfers().size() == 2);
+                transit0.getPossibleTransferMap().size() == 2);
 
         Transit transit4 = transitMap.get("transit4");
         assertTrue("transit4 should have 4 possible transfers via pass through stops",
-                transit4.getPossibleTransfers().size() == 4);
+                transit4.getPossibleTransferMap().size() == 4);
 
         Transit transit5 = transitMap.get("transit5");
         assertTrue("transit5 should have 4 possible transfers via nearby stops",
-                transit5.getPossibleTransfers().size() == 4);
+                transit5.getPossibleTransferMap().size() == 4);
 
-        QuadTree<TransitStop> tree = graph.getStops();
+        QuadTree<TransitStation> tree = graph.getStations();
         assertTrue("there should be 28 stops in total", tree.size() == 28);
     }
 }
