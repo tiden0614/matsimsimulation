@@ -55,6 +55,7 @@ public class RouteOnTransit {
      *         the starting stop and ending stop needs to be added to the first and last elements of the list
      */
     public List<TransitTrip> routeFromStartToEnd(Transit start, Transit end) {
+        // TODO this method needs to be refactored
         if (start.equals(end)) {
             List<TransitTrip> ret = new ArrayList<TransitTrip>();
             ret.add(new TransitTrip(null, null, start));

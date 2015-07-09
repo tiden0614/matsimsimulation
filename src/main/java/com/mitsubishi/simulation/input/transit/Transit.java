@@ -64,11 +64,21 @@ public class Transit {
      */
     public List<Transfer> computeForwardPossibleTransfers(TransitStation currentStation) {
         List<Transfer> transfers = new ArrayList<Transfer>();
-        int stopIndex = stops.indexOf(currentStation);
+        int stopIndex;
+        for (stopIndex = 0;
+             stopIndex < stops.size() && stops.get(stopIndex).getStation() != currentStation; stopIndex++) ;
 
-        // the argument should really be one of the stops of this transit
-        assert -1 < stopIndex;
+        // the argument should really be one of the stations that this transit passes through
+        assert stopIndex < stops.size();
 
+        // find all stops that has a greater index than that of the given stop
+        for (List<Transfer> list : possibleTransferMap.values()) {
+            for (Transfer transfer : list) {
+                if (transfer.getFromStop().getIndex() >= stopIndex) {
+                    transfers.add(transfer);
+                }
+            }
+        }
 
         return transfers;
     }
