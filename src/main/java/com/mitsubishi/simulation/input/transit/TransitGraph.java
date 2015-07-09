@@ -104,10 +104,10 @@ public class TransitGraph {
                                     // can transfer to this nearby stop for the given transit
                                     // if we find any, compare their distance and preserve the nearer one
                                     Iterator<Transfer> iterator = transfers.listIterator();
-                                    Transfer existingTransfer;
                                     boolean foundExistingSameDestination = false;
                                     boolean addToTransfers = false;
-                                    while ((existingTransfer = iterator.next()) != null) {
+                                    while (iterator.hasNext()) {
+                                        Transfer existingTransfer = iterator.next();
                                         if (existingTransfer.getToStop() == nearbyStop) {
                                             foundExistingSameDestination = true;
                                             if (nearbyStop.getDistanceFrom(existingTransfer.getFromStop()) >

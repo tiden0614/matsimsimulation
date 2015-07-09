@@ -66,15 +66,18 @@ public class RouteOnTransit {
         transitSet.add(start);
         transitStack.push(start);
 
-        Transit currentTransit = start;
-        while (!transitStack.isEmpty() && currentTransit != end) {
+        while (!transitStack.isEmpty()) {
+            Transit currentTransit = transitStack.peek();
+            if (currentTransit.equals(end)) {
+                break;
+            }
             boolean foundNextMove = false;
             // find possible transfers that has not been visited
             for (List<Transfer> transfers : currentTransit.getPossibleTransfers().values()) {
                 if (transfers.size() > 0 && !transitSet.contains(transfers.get(0).getToTransit())) {
-                    currentTransit = transfers.get(0).getToTransit();
-                    transitSet.add(currentTransit);
-                    transitStack.push(currentTransit);
+                    Transit next = transfers.get(0).getToTransit();
+                    transitSet.add(next);
+                    transitStack.push(next);
                     foundNextMove = true;
                     break;
                 }
@@ -83,7 +86,7 @@ public class RouteOnTransit {
                 continue;
             }
             if (!transitStack.isEmpty()) {
-                currentTransit = transitStack.pop();
+                transitStack.pop();
             }
         }
 

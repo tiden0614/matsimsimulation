@@ -18,10 +18,10 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Created by tiden on 7/7/2015.
+ * This test case tests transit graph build algorithms
  */
 public class TestTransitGraph {
 
-    private final String input = "testinput/test-osm-basic.xml";
 
     private List<Transit> transits;
     private List<TransitStop> stops;
@@ -29,16 +29,16 @@ public class TestTransitGraph {
     @Before
     public void setup() {
         Network network = NetworkUtils.convertOSMToNetwork(
-                input, TransformationFactory.WGS84, TransformationFactory.WGS84
+                TestConstants.OSM_TEST_INPUT, TransformationFactory.WGS84, TransformationFactory.WGS84
         );
-        OSMRelationTransitAdapter adapter = new OSMRelationTransitAdapter(input, network);
+        OSMRelationTransitAdapter adapter = new OSMRelationTransitAdapter(TestConstants.OSM_TEST_INPUT, network);
         transits = adapter.getTransits();
         stops = adapter.getTransitStops();
     }
 
     @Test
     public void testTransitGraph() {
-        TransitGraph graph = new TransitGraph(transits, stops, 0.00005);
+        TransitGraph graph = new TransitGraph(transits, stops, TestConstants.DISTANCE_VERY_SMALL);
 
         Map<String, Transit> transitMap = graph.getTransits();
         assertTrue(transitMap.size() == 6);
