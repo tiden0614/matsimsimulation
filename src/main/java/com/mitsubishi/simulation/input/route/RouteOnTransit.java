@@ -7,6 +7,7 @@ import java.util.*;
 
 /**
  * Created by tiden on 7/8/2015.
+ * This class contains algorithms that compute routes on public transport network
  */
 public class RouteOnTransit {
     private static final Logger logger = Logger.getLogger(RouteOnTransit.class);

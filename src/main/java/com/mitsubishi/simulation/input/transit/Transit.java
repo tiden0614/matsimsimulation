@@ -73,6 +73,9 @@ public class Transit {
         }
 
         // find all stops that has a greater index than that of the given stop
+        // transfers from the current station are not included in the returned results,
+        // because it makes no sense to transfer from this transit to another
+        // without going forward at all
         for (List<Transfer> list : possibleTransferMap.values()) {
             for (Transfer transfer : list) {
                 if (transfer.getFromStop().getIndex() > stopIndex) {
@@ -84,6 +87,11 @@ public class Transit {
         return transfers;
     }
 
+    /**
+     * Find the stop at the given station
+     * @param station the station where the stop locates
+     * @return the corresponding stop or null if not found
+     */
     public TransitStop getStopFromStation(TransitStation station) {
         for (TransitStop stop : stops) {
             if (stop.getStation() == station) {
