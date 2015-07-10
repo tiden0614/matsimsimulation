@@ -68,19 +68,29 @@ public class Transit {
         for (stopIndex = 0;
              stopIndex < stops.size() && stops.get(stopIndex).getStation() != currentStation; stopIndex++) ;
 
-        // the argument should really be one of the stations that this transit passes through
-        assert stopIndex < stops.size();
+        if (stopIndex >= stops.size()) {
+            return transfers;
+        }
 
         // find all stops that has a greater index than that of the given stop
         for (List<Transfer> list : possibleTransferMap.values()) {
             for (Transfer transfer : list) {
-                if (transfer.getFromStop().getIndex() >= stopIndex) {
+                if (transfer.getFromStop().getIndex() > stopIndex) {
                     transfers.add(transfer);
                 }
             }
         }
 
         return transfers;
+    }
+
+    public TransitStop getStopFromStation(TransitStation station) {
+        for (TransitStop stop : stops) {
+            if (stop.getStation() == station) {
+                return stop;
+            }
+        }
+        return null;
     }
 
     @Override

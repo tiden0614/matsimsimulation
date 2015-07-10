@@ -29,4 +29,16 @@ public class TransitTrip {
     public Transit getTransit() {
         return transit;
     }
+
+    public void setFromStation(TransitStation fromStation) {
+        this.fromStation = fromStation;
+    }
+
+    public void setToStation(TransitStation toStation) {
+        this.toStation = toStation;
+    }
+
+    public void setTransit(Transit transit) {
+        this.transit = transit;
+    }
 }

@@ -7,7 +7,7 @@ package com.mitsubishi.simulation.input.transit;
  * TransitStop belongs to one and only one particular transit and has an index
  * TransitStation is a common station where multiple Transits can pass through
  */
-public class TransitStop {
+public class TransitStop implements Comparable {
     private TransitStation station;
     private int index;
 
@@ -22,5 +22,12 @@ public class TransitStop {
 
     public int getIndex() {
         return index;
+    }
+
+    public int compareTo(Object o) {
+        if (o instanceof TransitStop) {
+            return index - ((TransitStop) o).getIndex();
+        }
+        return -1;
     }
 }
