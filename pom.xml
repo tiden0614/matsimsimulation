@@ -25,5 +25,17 @@
       <artifactId>osmosis-core</artifactId>
       <version>0.44.1</version>
     </dependency>
+    <dependency>
+      <groupId>org.openstreetmap.osmosis</groupId>
+      <artifactId>osmosis-xml</artifactId>
+      <version>0.44.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.openstreetmap.osmosis</groupId>
+      <artifactId>osmosis-tagfilter</artifactId>
+      <version>0.44.1</version>
+    </dependency>
+
   </dependencies>
 </project>
