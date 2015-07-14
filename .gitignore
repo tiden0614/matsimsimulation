@@ -5,3 +5,5 @@ target/*
 output/*
 *.iml
 kanagawa-input/*
+NLNIInput/*
+examples/*
