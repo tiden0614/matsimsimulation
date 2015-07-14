@@ -1,7 +1,6 @@
 package com.mitsubishi.simulation.input.nlni;
 
 import com.mitsubishi.simulation.input.transit.Transit;
-import com.mitsubishi.simulation.input.transit.TransitAdapter;
 import com.mitsubishi.simulation.input.transit.TransitStation;
 import com.mitsubishi.simulation.input.transit.TransitStop;
 import org.matsim.api.core.v01.network.Link;
@@ -10,7 +9,6 @@ import org.matsim.core.basic.v01.IdImpl;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.NodeImpl;
 import org.matsim.core.utils.geometry.CoordImpl;
-import org.matsim.core.utils.io.MatsimXmlParser;
 import org.xml.sax.Attributes;
 
 import java.util.*;
@@ -20,7 +18,7 @@ import java.util.*;
  * This adapter transforms National Land Numerical Information's railway data
  * into Transit and TransitStation.
  */
-public class NLNIRailwayTransitAdapter extends MatsimXmlParser implements TransitAdapter {
+public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
 
     private List<Transit> transits;
     private Map<String, TransitStation> transitStations;
@@ -34,11 +32,9 @@ public class NLNIRailwayTransitAdapter extends MatsimXmlParser implements Transi
     private Map<String, NLNIRailwayLine> lines;
 
     private Network network;
-    private long idGen;
 
     public NLNIRailwayTransitAdapter(String inputFile, Network network) {
         this.network = network;
-        this.idGen = Long.MAX_VALUE;
 
         transits = new ArrayList<Transit>();
         transitStations = new HashMap<String, TransitStation>();
@@ -67,28 +63,39 @@ public class NLNIRailwayTransitAdapter extends MatsimXmlParser implements Transi
     private void convert() {
         for (NLNIRailwayLine line : lines.values()) {
             Transit transit = new Transit(Transit.TRAIN, line.getName());
+            transit.setDuplexTransit(true);
+            List<Link> transitLinks = transit.getLinks();
             TransitStation lastStation = null;
             int index = 0;
-            for (NLNIRailwayStation s : line.getStations()) {
+            for (NLNIRailwayStation s : line.getStationSet()) {
                 TransitStation transitStation = transitStations.get(s.getName());
                 if (transitStation == null) {
+                    // add new station to the data structure
                     double x = s.getX();
                     double y = s.getY();
                     NodeImpl node = new NodeImpl(new IdImpl(s.getId()));
                     node.setCoord(new CoordImpl(x, y));
-                    network.addNode(node);
+                    synchronized (AbstractNLNITransitAdapter.class) {
+                        network.addNode(node);
+                    }
                     transitStation = new TransitStation(s.getName(), node);
                     transitStations.put(transitStation.getName(), transitStation);
                 }
                 if (lastStation != null) {
+                    // since all data from NLNI are actual duplex trains
+                    // add both links from station A to station B and station B to station A
                     Link link1 = network.getFactory().createLink(
-                            new IdImpl(idGen--), lastStation.getNode(), transitStation.getNode()
+                            new IdImpl(getNextId()), lastStation.getNode(), transitStation.getNode()
                     );
                     Link link2 = network.getFactory().createLink(
-                            new IdImpl(idGen--), transitStation.getNode(), lastStation.getNode()
+                            new IdImpl(getNextId()), transitStation.getNode(), lastStation.getNode()
                     );
-                    network.addLink(link1);
-                    network.addLink(link2);
+                    transitLinks.add(link1);
+                    transitLinks.add(link2);
+                    synchronized (AbstractNLNITransitAdapter.class) {
+                        network.addLink(link1);
+                        network.addLink(link2);
+                    }
                 }
                 TransitStop stop = new TransitStop(transitStation, index++);
                 transit.getStops().add(stop);

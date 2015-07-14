@@ -47,4 +47,20 @@ public class NLNIRailwayStation {
     public String toString() {
         return name;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof NLNIRailwayStation)) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        return name.equals(((NLNIRailwayStation) obj).getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
 }
