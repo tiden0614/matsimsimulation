@@ -33,4 +33,10 @@ public class Transfer {
     public TransitStop getToStop() {
         return toStop;
     }
+
+    @Override
+    public String toString() {
+        return fromTransit.getName() + ":" + fromStop.getStation().getName() + " -> " +
+                toTransit.getName() + ":" + toStop.getStation().getName();
+    }
 }

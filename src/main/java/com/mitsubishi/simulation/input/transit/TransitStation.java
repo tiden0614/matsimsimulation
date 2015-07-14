@@ -51,4 +51,9 @@ public class TransitStation {
         double y2 = anotherStop.getNode().getCoord().getY();
         return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

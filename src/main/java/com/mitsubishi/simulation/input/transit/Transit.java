@@ -15,6 +15,11 @@ public class Transit {
     public static final String BUS = "bus";
     public static final String TRAIN = "train";
 
+    // That if this transit is a duplex transit affects how the transit schedule file is generated
+    // and also how the routing algorithm behaves
+    // If the transit is a one way transit, given a particular station, the computeForwardPossibleTransfers
+    // only gives out forward stations; otherwise it will return all transfers no matter forwards or backwards
+    private boolean duplexTransit;
     private String type;
     private String name;
     private List<TransitStop> stops;
@@ -26,6 +31,7 @@ public class Transit {
     private Transit() {}
 
     public Transit(String type, String name) {
+        this.duplexTransit = false;
         this.type = type;
         this.name = name;
         this.stops = new ArrayList<TransitStop>();
@@ -57,6 +63,10 @@ public class Transit {
         return possibleTransferMap;
     }
 
+    public void setDuplexTransit(boolean duplexTransit) {
+        this.duplexTransit = duplexTransit;
+    }
+
     /**
      * Compute possible transfers when starting from a particular station
      * @param currentStation the starting station
@@ -84,6 +94,8 @@ public class Transit {
             }
         }
 
+        // TODO implement duplex transit features
+
         return transfers;
     }
 
@@ -110,5 +122,10 @@ public class Transit {
             return this.name.equals(((Transit) object).getName());
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

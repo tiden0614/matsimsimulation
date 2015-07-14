@@ -30,4 +30,9 @@ public class TransitStop implements Comparable {
         }
         return -1;
     }
+
+    @Override
+    public String toString() {
+        return station.getName();
+    }
 }
