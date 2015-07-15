@@ -2,7 +2,6 @@ package com.mitsubishi.simulation.input.transit;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.population.Person;
 
 import java.util.*;
 
@@ -24,19 +23,18 @@ public class Transit {
     private String type;
     private String name;
     private List<TransitStop> stops;
-    private List<Link> links;
+    private List<Link> forwardLinks;
+    private List<Link> backwardLinks;
     // used to store edges in an directed graph
     private Map<String, List<Transfer>> possibleTransferMap;
-
-    // The use of default constructor is forbidden
-    private Transit() {}
 
     public Transit(String type, String name) {
         this.duplexTransit = false;
         this.type = type;
         this.name = name;
         this.stops = new ArrayList<TransitStop>();
-        this.links = new ArrayList<Link>();
+        this.forwardLinks = new ArrayList<Link>();
+        this.backwardLinks = null;
         this.possibleTransferMap = new LinkedHashMap<String, List<Transfer>>();
     }
 
@@ -56,8 +54,16 @@ public class Transit {
         return stops;
     }
 
+    public List<Link> getForwardLinks() {
+        return forwardLinks;
+    }
+
+    public List<Link> getBackwardLinks() {
+        return backwardLinks;
+    }
+
     public List<Link> getLinks() {
-        return links;
+        return forwardLinks;
     }
 
     public Map<String, List<Transfer>> getPossibleTransferMap() {
@@ -66,6 +72,13 @@ public class Transit {
 
     public void setDuplexTransit(boolean duplexTransit) {
         this.duplexTransit = duplexTransit;
+        if (duplexTransit && this.backwardLinks == null) {
+            this.backwardLinks = new ArrayList<Link>();
+        }
+    }
+
+    public boolean isDuplexTransit() {
+        return duplexTransit;
     }
 
     /**
@@ -267,10 +280,7 @@ public class Transit {
      * Transits are really distinguished by their names
      */
     public boolean equals(Object object) {
-        if (object instanceof Transit) {
-            return this.name.equals(((Transit) object).getName());
-        }
-        return false;
+        return object instanceof Transit && this.name.equals(((Transit) object).getName());
     }
 
     @Override

@@ -105,7 +105,8 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
             transit.rearrangeStops();
 
             // create links and add them to the network
-            List<Link> transitLinks = transit.getLinks();
+            List<Link> forwardLinks = transit.getForwardLinks();
+            List<Link> backwardLinks = transit.getBackwardLinks();
             TransitStation lastStation = null;
             for (TransitStop stop : transit.getStops()) {
                 TransitStation transitStation = stop.getStation();
@@ -118,8 +119,8 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
                     Link link2 = network.getFactory().createLink(
                             new IdImpl(getNextId()), transitStation.getNode(), lastStation.getNode()
                     );
-                    transitLinks.add(link1);
-                    transitLinks.add(link2);
+                    forwardLinks.add(link1);
+                    backwardLinks.add(link2);
                     synchronized (AbstractNLNITransitAdapter.class) {
                         network.addLink(link1);
                         network.addLink(link2);
