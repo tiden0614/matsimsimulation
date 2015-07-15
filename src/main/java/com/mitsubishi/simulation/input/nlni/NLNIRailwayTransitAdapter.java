@@ -64,9 +64,11 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
         for (NLNIRailwayLine line : lines.values()) {
             Transit transit = new Transit(Transit.TRAIN, line.getName());
             transit.setDuplexTransit(true);
-            List<Link> transitLinks = transit.getLinks();
-            TransitStation lastStation = null;
-            int index = 0;
+
+            // create nodes and add them to the network
+            // create stations
+            // create stops
+            List<TransitStop> stops = transit.getStops();
             for (NLNIRailwayStation s : line.getStationSet()) {
                 TransitStation transitStation = transitStations.get(s.getName());
                 if (transitStation == null) {
@@ -81,10 +83,19 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
                     transitStation = new TransitStation(s.getName(), node);
                     transitStations.put(transitStation.getName(), transitStation);
                 }
-                /* TODO the order of the stops is incorrect;
-                 * perform some algorithms to get the correct order
-                 * before adding links to the network
-                 */
+                TransitStop stop = new TransitStop(transitStation, Integer.MIN_VALUE);
+                stops.add(stop);
+                transitStation.getPassThroughTransitMap().put(transit, stop);
+            }
+
+            // rearrange the stops of this transit
+            transit.rearrangeStops();
+
+            // create links and add them to the network
+            List<Link> transitLinks = transit.getLinks();
+            TransitStation lastStation = null;
+            for (TransitStop stop : transit.getStops()) {
+                TransitStation transitStation = stop.getStation();
                 if (lastStation != null) {
                     // since all data from NLNI are actual duplex trains
                     // add both links from station A to station B and station B to station A
@@ -101,9 +112,6 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
                         network.addLink(link2);
                     }
                 }
-                TransitStop stop = new TransitStop(transitStation, index++);
-                transit.getStops().add(stop);
-                transitStation.getPassThroughTransitMap().put(transit, stop);
                 lastStation = transitStation;
             }
             transits.add(transit);

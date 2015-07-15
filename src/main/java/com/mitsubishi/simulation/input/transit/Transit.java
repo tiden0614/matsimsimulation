@@ -1,11 +1,9 @@
 package com.mitsubishi.simulation.input.transit;
 
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.population.Person;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by tiden on 7/3/2015.
@@ -97,6 +95,143 @@ public class Transit {
         // TODO implement duplex transit features
 
         return transfers;
+    }
+
+    /**
+     * Since the stops loaded from some data source are in incorrect order, it needs to rearrange the stops
+     * The algorithm calculates relative distance between each stop and find a most possible path connecting
+     * the stops
+     *
+     * This algorithm still needs to be refined since it considers only *regular* transit data and it will
+     * not be correct if there is peculiar/partial/incorrect data that makes the stops to form two graphs
+     *
+     * This algorithm is tested by the data absorbed from National Land Numerical Information's train data
+     * Further tests should be conducted
+     *
+     * The time complexity is O(n^2), where n is the number of stops of this transit
+     * The space complexity is O(n)
+     */
+    public void rearrangeStops() {
+        // There's no need to calculate transits that have none or only one stop
+        if (stops.size() <= 1) {
+            return;
+        }
+
+        // For transits that have only two stops, assign indexes directly
+        if (stops.size() == 2) {
+            for (int i = 0; i < stops.size(); i++) {
+                stops.get(i).setIndex(i);
+            }
+            return;
+        }
+
+        // Iterate stops of this transit, assign them their nearest and 2nd nearest stops
+        // The time complexity of this operation is O(n^2) where n is the number of stops of this transit
+        for (TransitStop stop : stops) {
+
+            // first find the nearest
+            double minDistance = Double.MAX_VALUE;
+            TransitStop nearest = null;
+            for (TransitStop anotherStop : stops) {
+                if (anotherStop != stop) {
+                    double distance = stop.getDistanceFromStop(anotherStop);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        nearest = anotherStop;
+                    }
+                }
+            }
+
+            // find the 2nd nearest
+            minDistance = Double.MAX_VALUE;
+            TransitStop secNearest = null;
+            for (TransitStop anotherStop : stops) {
+                if (anotherStop != stop && anotherStop != nearest) {
+                    double distance = stop.getDistanceFromStop(anotherStop);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        secNearest = anotherStop;
+                    }
+                }
+            }
+
+            // set the nearest and the 2nd nearest
+            stop.setNearestStopInLine(nearest);
+            stop.setSecNearestStopInLine(secNearest);
+
+            // initialize the indexes of each stop
+            stop.setIndex(Integer.MIN_VALUE);
+        }
+
+        TransitStop currentStop = null;
+
+        // If stop A has a nearest stop B, but A is not the nearest or 2nd nearest stop of B,
+        // set A's nearest to null; do the same to the 2nd nearest of A
+        // In other words, after this operation, all stops are either the nearest or 2nd nearest stops of their nearest
+        // or 2nd nearest stops
+        // The time complexity of this operation is O(n)
+        for (TransitStop stop : stops) {
+
+            // for debug use
+            if (stop.getNearestStopInLine() == null || stop.getSecNearestStopInLine() == null) {
+                System.out.println(name);
+                for (TransitStop transitStop : stops) {
+                    System.out.println("\t" + transitStop.toString());
+                }
+                System.out.println();
+                return;
+            }
+
+            if (!stop.getNearestStopInLine().isMyNearestOrSecNearest(stop)) {
+                stop.setNearestStopInLine(null);
+            }
+            if (!stop.getSecNearestStopInLine().isMyNearestOrSecNearest(stop)) {
+                stop.setSecNearestStopInLine(null);
+            }
+            // If the above operation is correct, at least one of the nearest stops is not null
+            assert stop.getNearestStopInLine() != null || stop.getSecNearestStopInLine() != null;
+            // find one end of the line
+            if (stop.getNearestStopInLine() == null || stop.getSecNearestStopInLine() == null) {
+                currentStop = stop;
+            }
+        }
+
+        if (currentStop == null) {
+            // we cannot find an end; the stops actually form a ring; just pick one to start
+            currentStop = stops.get(0);
+        }
+
+
+        // Treat the stops and their nearest stops as a graph
+        // Traverse the graph and assign indexes
+        Set<TransitStop> visited = new HashSet<TransitStop>();
+        Stack<TransitStop> stack = new Stack<TransitStop>();
+
+        stack.push(currentStop);
+        visited.add(currentStop);
+        currentStop.setIndex(0);
+
+        int nextIndex = 1;
+
+        while (!stack.isEmpty()) {
+            currentStop = stack.peek();
+            TransitStop nearest = currentStop.getNearestStopInLine();
+            TransitStop secNearest = currentStop.getSecNearestStopInLine();
+            if (nearest != null && !visited.contains(nearest)) {
+                stack.push(nearest);
+                visited.add(nearest);
+                nearest.setIndex(nextIndex++);
+            } else if (secNearest != null && !visited.contains(secNearest)) {
+                stack.push(secNearest);
+                visited.add(secNearest);
+                secNearest.setIndex(nextIndex++);
+            } else {
+                stack.pop();
+            }
+        }
+
+        // Sort the stops according to their indexes
+        Collections.sort(stops);
     }
 
     /**

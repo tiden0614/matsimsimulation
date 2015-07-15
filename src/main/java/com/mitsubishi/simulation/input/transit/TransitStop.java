@@ -11,6 +11,9 @@ public class TransitStop implements Comparable {
     private TransitStation station;
     private int index;
 
+    private TransitStop nearestStopInLine;
+    private TransitStop secNearestStopInLine;
+
     public TransitStop(TransitStation station, int index) {
         this.station = station;
         this.index = index;
@@ -29,6 +32,34 @@ public class TransitStop implements Comparable {
             return index - ((TransitStop) o).getIndex();
         }
         return -1;
+    }
+
+    public TransitStop getNearestStopInLine() {
+        return nearestStopInLine;
+    }
+
+    public TransitStop getSecNearestStopInLine() {
+        return secNearestStopInLine;
+    }
+
+    public void setNearestStopInLine(TransitStop nearestStopInLine) {
+        this.nearestStopInLine = nearestStopInLine;
+    }
+
+    public void setSecNearestStopInLine(TransitStop secNearestStopInLine) {
+        this.secNearestStopInLine = secNearestStopInLine;
+    }
+
+    public double getDistanceFromStop(TransitStop stop) {
+        return station.getDistanceFrom(stop.getStation());
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public boolean isMyNearestOrSecNearest(TransitStop stop) {
+        return stop == nearestStopInLine || stop == secNearestStopInLine;
     }
 
     @Override

@@ -41,14 +41,14 @@ public class TransitStation {
         return passThroughTransitMap;
     }
 
-    public double getDistanceFrom(TransitStation anotherStop) {
-        if (anotherStop == this || anotherStop.getNode() == node) {
+    public double getDistanceFrom(TransitStation station) {
+        if (station == this || station.getNode() == node) {
             return 0;
         }
         double x1 = node.getCoord().getX();
         double y1 = node.getCoord().getY();
-        double x2 = anotherStop.getNode().getCoord().getX();
-        double y2 = anotherStop.getNode().getCoord().getY();
+        double x2 = station.getNode().getCoord().getX();
+        double y2 = station.getNode().getCoord().getY();
         return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
     }
 
