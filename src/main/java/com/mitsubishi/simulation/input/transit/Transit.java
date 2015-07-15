@@ -81,6 +81,7 @@ public class Transit {
         }
 
         // find all stops that has a greater index than that of the given stop
+
         // transfers from the current station are not included in the returned results,
         // because it makes no sense to transfer from this transit to another
         // without going forward at all
@@ -98,18 +99,21 @@ public class Transit {
     }
 
     /**
-     * Since the stops loaded from some data source are in incorrect order, it needs to rearrange the stops
-     * The algorithm calculates relative distance between each stop and find a most possible path connecting
+     * Since the order of stops loaded from some data source is incorrect, it needs to rearrange the stops
+     *
+     * The algorithm computes relative distances between stops and finds a most possible path connecting
      * the stops
      *
      * This algorithm still needs to be refined since it considers only *regular* transit data and it will
-     * not be correct if there is peculiar/partial/incorrect data that makes the stops to form two graphs
+     * not be correct if there is peculiar/partial/incorrect data that makes the stops to form more than one
+     * graphs
      *
      * This algorithm is tested by the data absorbed from National Land Numerical Information's train data
+     *
      * Further tests should be conducted
      *
-     * The time complexity is O(n^2), where n is the number of stops of this transit
-     * The space complexity is O(n)
+     * The time complexity is O(n^2) and the space complexity is O(n), where n is the number of stops of
+     * this transit
      */
     public void rearrangeStops() {
         // There's no need to calculate transits that have none or only one stop
@@ -204,6 +208,7 @@ public class Transit {
 
         // Treat the stops and their nearest stops as a graph
         // Traverse the graph and assign indexes
+        // The time complexity of this operation is O(n)
         Set<TransitStop> visited = new HashSet<TransitStop>();
         Stack<TransitStop> stack = new Stack<TransitStop>();
 
@@ -231,6 +236,7 @@ public class Transit {
         }
 
         // Sort the stops according to their indexes
+        // The time complexity of this operation is O(n*logn) (hopefully:)
         Collections.sort(stops);
     }
 
