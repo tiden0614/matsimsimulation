@@ -1,9 +1,6 @@
 package com.mitsubishi.simulation.input.nlni;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by tiden on 7/14/2015.
@@ -28,7 +25,7 @@ public class NLNIRailwayLine {
     }
 
     public Set<NLNIRailwayStation> getStationSet() {
-        Set<NLNIRailwayStation> stationSet = new HashSet<NLNIRailwayStation>();
+        Set<NLNIRailwayStation> stationSet = new LinkedHashSet<NLNIRailwayStation>();
         stationSet.addAll(stations);
         return stationSet;
     }

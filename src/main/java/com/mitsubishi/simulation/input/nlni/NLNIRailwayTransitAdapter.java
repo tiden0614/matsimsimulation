@@ -81,6 +81,10 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
                     transitStation = new TransitStation(s.getName(), node);
                     transitStations.put(transitStation.getName(), transitStation);
                 }
+                /* TODO the order of the stops is incorrect;
+                 * perform some algorithms to get the correct order
+                 * before adding links to the network
+                 */
                 if (lastStation != null) {
                     // since all data from NLNI are actual duplex trains
                     // add both links from station A to station B and station B to station A
