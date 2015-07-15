@@ -5,6 +5,7 @@ import com.mitsubishi.simulation.input.osm.OSMRelationTransitAdapter;
 import com.mitsubishi.simulation.input.transit.Transit;
 import com.mitsubishi.simulation.input.transit.TransitGraph;
 import com.mitsubishi.simulation.input.transit.TransitStation;
+import com.mitsubishi.simulation.utils.Constants;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.api.core.v01.network.Network;
@@ -29,16 +30,16 @@ public class TestTransitGraph {
     @Before
     public void setup() {
         Network network = NetworkUtils.convertOSMToNetwork(
-                TestConstants.OSM_TEST_INPUT, TransformationFactory.WGS84, TransformationFactory.WGS84
+                Constants.OSM_TEST_INPUT, TransformationFactory.WGS84, TransformationFactory.WGS84
         );
-        OSMRelationTransitAdapter adapter = new OSMRelationTransitAdapter(TestConstants.OSM_TEST_INPUT, network);
+        OSMRelationTransitAdapter adapter = new OSMRelationTransitAdapter(Constants.OSM_TEST_INPUT, network);
         transits = adapter.getTransits();
         stops = adapter.getTransitStations();
     }
 
     @Test
     public void testTransitGraph() {
-        TransitGraph graph = new TransitGraph(transits, stops, TestConstants.DISTANCE_VERY_SMALL);
+        TransitGraph graph = new TransitGraph(transits, stops, Constants.WGS_DISTANCE_VERY_SMALL);
 
         Map<String, Transit> transitMap = graph.getTransits();
         assertTrue(transitMap.size() == 6);

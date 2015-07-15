@@ -4,6 +4,7 @@ import com.mitsubishi.simulation.input.network.NetworkUtils;
 import com.mitsubishi.simulation.input.osm.OSMRelationTransitAdapter;
 import com.mitsubishi.simulation.input.transit.Transit;
 import com.mitsubishi.simulation.input.transit.TransitStation;
+import com.mitsubishi.simulation.utils.Constants;
 import org.junit.Test;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
@@ -20,9 +21,9 @@ public class TestOSMRelationTransitAdapter {
     @Test
     public void testAdapter() {
         Network network = NetworkUtils.convertOSMToNetwork(
-                TestConstants.OSM_TEST_INPUT, TransformationFactory.WGS84, TransformationFactory.WGS84
+                Constants.OSM_TEST_INPUT, TransformationFactory.WGS84, TransformationFactory.WGS84
         );
-        OSMRelationTransitAdapter adapter = new OSMRelationTransitAdapter(TestConstants.OSM_TEST_INPUT, network);
+        OSMRelationTransitAdapter adapter = new OSMRelationTransitAdapter(Constants.OSM_TEST_INPUT, network);
 
         List<Transit> transits = adapter.getTransits();
         assertTrue(transits.size() > 0);

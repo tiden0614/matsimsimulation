@@ -2,6 +2,7 @@ package com.mitsubishi.simulation.test;
 
 import com.mitsubishi.simulation.input.osm.OSMRelation;
 import com.mitsubishi.simulation.input.osm.OSMRelationXMLParser;
+import com.mitsubishi.simulation.utils.Constants;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ public class TestOSMRelationXMLParser {
         filter.put("type", "route");
         filter.put("route", new String[]{"bus", "train"});
         OSMRelationXMLParser parser = new OSMRelationXMLParser(relationList, filter);
-        parser.parse(TestConstants.OSM_TEST_INPUT);
+        parser.parse(Constants.OSM_TEST_INPUT);
         assertTrue(relationList.size() > 0);
     }
 }
