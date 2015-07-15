@@ -1,5 +1,6 @@
 package com.mitsubishi.simulation.input.transit;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 
@@ -12,6 +13,8 @@ import java.util.*;
 public class Transit {
     public static final String BUS = "bus";
     public static final String TRAIN = "train";
+
+    private static final Logger logger = Logger.getLogger(Transit.class);
 
     // That if this transit is a duplex transit affects how the transit schedule file is generated
     // and also how the routing algorithm behaves
@@ -178,11 +181,16 @@ public class Transit {
 
             // for debug use
             if (stop.getNearestStopInLine() == null || stop.getSecNearestStopInLine() == null) {
-                System.out.println(name);
+                StringBuilder builder = new StringBuilder("An error happened when rearranging stops for Transit: ");
+                builder.append(name);
+                builder.append("\n");
                 for (TransitStop transitStop : stops) {
-                    System.out.println("\t" + transitStop.toString());
+                    builder.append("\t");
+                    builder.append(transitStop.getStation().getName());
+                    builder.append("\n");
                 }
-                System.out.println();
+                builder.append("\nThe stops of this Transit form more than one graph\n");
+                logger.warn(builder.toString());
                 return;
             }
 

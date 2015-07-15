@@ -3,6 +3,7 @@ package com.mitsubishi.simulation.input.nlni;
 import com.mitsubishi.simulation.input.transit.Transit;
 import com.mitsubishi.simulation.input.transit.TransitStation;
 import com.mitsubishi.simulation.input.transit.TransitStop;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.basic.v01.IdImpl;
@@ -19,6 +20,8 @@ import java.util.*;
  * into Transit and TransitStation.
  */
 public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
+
+    private static final Logger logger = Logger.getLogger(NLNIRailwayTransitAdapter.class);
 
     private List<Transit> transits;
     private Map<String, TransitStation> transitStations;
@@ -43,11 +46,21 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
         lines = new HashMap<String, NLNIRailwayLine>();
         setValidating(false);
 
+        logger.info("Starting to load lines and stations from " + inputFile);
+
         // get raw types from the xml file
         parse(inputFile);
 
+        logger.info(inputFile + " has been loaded");
+        logger.info(lines.size() + " lines and " + stations.size() + " stations are loaded");
+
+        logger.info("Converting the data into Transits and TransitStations");
+
         // convert the raw types into Transits and TransitStations
         convert();
+
+        logger.info("Conversion done");
+        logger.info(transits.size() + " Transits and " + transitStations.size() + " TransitStations are generated");
     }
 
     public List<Transit> getTransits() {
