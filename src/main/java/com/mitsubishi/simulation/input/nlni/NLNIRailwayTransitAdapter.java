@@ -4,6 +4,7 @@ import com.mitsubishi.simulation.input.transit.Transit;
 import com.mitsubishi.simulation.input.transit.TransitStation;
 import com.mitsubishi.simulation.input.transit.TransitStop;
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.basic.v01.IdImpl;
@@ -74,6 +75,11 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
     }
 
     private void convert() {
+
+        // Set the links of transits to allow public transport
+        Set<String> trainMode = new HashSet<String>();
+        trainMode.add(TransportMode.pt);
+
         for (NLNIRailwayLine line : lines.values()) {
             Transit transit = new Transit(Transit.TRAIN, line.getName());
             transit.setDuplexTransit(true);
@@ -119,6 +125,8 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
                     Link link2 = network.getFactory().createLink(
                             new IdImpl(getNextId()), transitStation.getNode(), lastStation.getNode()
                     );
+                    link1.setAllowedModes(trainMode);
+                    link2.setAllowedModes(trainMode);
                     forwardLinks.add(link1);
                     backwardLinks.add(link2);
                     synchronized (AbstractNLNITransitAdapter.class) {
