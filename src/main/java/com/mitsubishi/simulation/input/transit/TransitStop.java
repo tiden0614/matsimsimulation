@@ -67,27 +67,6 @@ public class TransitStop implements Comparable {
         return stop == nearestStopInLine || stop == secNearestStopInLine;
     }
 
-    public Link getStopLink() {
-        Node myNode = station.getNode();
-        Node hisNode;
-        Link l;
-        if (nearestStopInLine != null) {
-            hisNode = nearestStopInLine.getStation().getNode();
-        } else if (secNearestStopInLine != null) {
-            hisNode = secNearestStopInLine.getStation().getNode();
-        } else {
-            // Should never fall into this block; there should not exist a stop whose
-            // both nearest and 2nd nearest stops are null
-            return null;
-        }
-        l = myNode.getOutLinks().get(hisNode.getId());
-        if (l != null) {
-            return l;
-        }
-        l = hisNode.getOutLinks().get(myNode.getId());
-        return l;
-    }
-
     @Override
     public String toString() {
         return station.getName();
