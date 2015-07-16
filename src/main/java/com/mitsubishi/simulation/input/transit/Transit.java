@@ -143,6 +143,7 @@ public class Transit {
      * The time complexity is O(n^2) and the space complexity is O(n), where n is the number of stops of
      * this transit
      */
+    @Deprecated
     public void rearrangeStops() {
         // There's no need to calculate transits that have none or only one stop
         if (stops.size() <= 1) {
@@ -186,7 +187,7 @@ public class Transit {
                     double x1 = anotherStop.getStation().getNode().getCoord().getX();
                     double y1 = anotherStop.getStation().getNode().getCoord().getY();
                     double angle = Math.abs(Math.atan2(y0 - y1, x0 - x1)) % Math.PI;
-                    if (distance < minDistance && angle > Math.PI / 4) {
+                    if (distance < minDistance && angle > Math.PI / 2) {
                         minDistance = distance;
                         secNearest = anotherStop;
                     }
@@ -208,8 +209,8 @@ public class Transit {
             }
 
             // set the nearest and the 2nd nearest
-            stop.setNearestStopInLine(nearest);
-            stop.setSecNearestStopInLine(secNearest);
+            stop.setLinkedStopA(nearest);
+            stop.setLinkedStopB(secNearest);
 
             // initialize the indexes of each stop
             stop.setIndex(Integer.MIN_VALUE);
@@ -225,7 +226,7 @@ public class Transit {
         for (TransitStop stop : stops) {
 
             // for debug use
-            if (stop.getNearestStopInLine() == null || stop.getSecNearestStopInLine() == null) {
+            if (stop.getLinkedStopA() == null || stop.getLinkedStopB() == null) {
                 StringBuilder builder = new StringBuilder("An error happened when rearranging stops for Transit: ");
                 builder.append(name);
                 builder.append("\n");
@@ -239,13 +240,13 @@ public class Transit {
                 return;
             }
 
-            if (!stop.getSecNearestStopInLine().isMyNearestOrSecNearest(stop)) {
-                stop.setSecNearestStopInLine(null);
+            if (!stop.getLinkedStopB().isMyNearestOrSecNearest(stop)) {
+                stop.setLinkedStopB(null);
             }
             // If the above operation is correct, at least the nearest stops is not null
-            assert stop.getNearestStopInLine() != null;
+            assert stop.getLinkedStopA() != null;
             // find one end of the line
-            if (stop.getSecNearestStopInLine() == null) {
+            if (stop.getLinkedStopB() == null) {
                 currentStop = stop;
             }
         }
@@ -270,8 +271,8 @@ public class Transit {
 
         while (!stack.isEmpty()) {
             currentStop = stack.peek();
-            TransitStop nearest = currentStop.getNearestStopInLine();
-            TransitStop secNearest = currentStop.getSecNearestStopInLine();
+            TransitStop nearest = currentStop.getLinkedStopA();
+            TransitStop secNearest = currentStop.getLinkedStopB();
             if (nearest != null && !visited.contains(nearest)) {
                 stack.push(nearest);
                 visited.add(nearest);
@@ -303,6 +304,174 @@ public class Transit {
                 i.remove();
             }
         }
+    }
+
+    public Set<TransitStop> neoRearrangeStops() {
+        // There's no need to compute transits that have none or only one stop
+        if (stops.size() <= 1) {
+            return null;
+        }
+
+        // For transits that have only two stops, assign indexes directly
+        if (stops.size() == 2) {
+            for (int i = 0; i < stops.size(); i++) {
+                stops.get(i).setIndex(i);
+            }
+            return null;
+        }
+
+        Stack<TransitStop> stack = new Stack<TransitStop>();
+        Set<TransitStop> visited = new HashSet<TransitStop>();
+
+        TransitStop currentStop = stops.get(0);
+
+        stack.push(currentStop);
+        visited.add(currentStop);
+
+        TransitStop endPoint = null;
+
+        while (!stack.isEmpty()) {
+            currentStop = stack.peek();
+            if (currentStop.getLinkedStopA() == null && currentStop.getLinkedStopB() == null) {
+                // this is a start point; let's just find the closest stop without an angle
+                TransitStop nextStop = findNextStop(currentStop, 0, visited);
+                currentStop.setLinkedStopB(nextStop);
+                if (nextStop.getLinkedStopA() == null) {
+                    nextStop.setLinkedStopA(currentStop);
+                } else if (nextStop.getLinkedStopB() == null) {
+                    nextStop.setLinkedStopB(currentStop);
+                } else {
+                    // how come we find a stop that already has got 2 links?
+                }
+                stack.push(nextStop);
+            } else if (currentStop.getLinkedStopA() == null || currentStop.getLinkedStopB() == null) {
+                // there is one and only one link that is null
+                TransitStop nextStop = findNextStop(currentStop, Math.PI / 2, visited);
+                if (nextStop == null) {
+                    nextStop = findNextStop(currentStop, Math.PI / 3, visited);
+                }
+                if (nextStop == null) {
+                    nextStop = findNextStop(currentStop, Math.PI / 4, visited);
+                }
+                if (nextStop == null) {
+                    nextStop = findNextStop(currentStop, Math.PI / 6, visited);
+                }
+                if (nextStop == null) {
+                    // OK, we find an endpoint, pop this stop
+                    endPoint = currentStop;
+                    stack.pop();
+                } else {
+                    if (currentStop.getLinkedStopA() == null) {
+                        currentStop.setLinkedStopA(nextStop);
+                    } else {
+                        currentStop.setLinkedStopB(nextStop);
+                    }
+
+                    if (nextStop.getLinkedStopA() == null) {
+                        nextStop.setLinkedStopA(currentStop);
+                    } else if (nextStop.getLinkedStopB() == null) {
+                        nextStop.setLinkedStopB(currentStop);
+                    } else {
+                        // how come we find a stop that already has got 2 links?
+                    }
+
+                    visited.add(nextStop);
+                    stack.push(nextStop);
+                }
+            } else {
+                // both the links are occupied
+                stack.pop();
+            }
+        }
+
+        assert endPoint != null;
+
+        // traverse the stops; reuse the stack
+
+        visited.clear();
+
+        stack.push(endPoint);
+        visited.add(endPoint);
+
+        int nextIndex = 0;
+
+        while (!stack.isEmpty()) {
+            currentStop = stack.peek();
+            TransitStop a = currentStop.getLinkedStopA();
+            TransitStop b = currentStop.getLinkedStopB();
+            if (a != null && !visited.contains(a)) {
+                stack.push(a);
+                visited.add(a);
+                currentStop.setIndex(nextIndex++);
+            } else if (b != null && !visited.contains(b)) {
+                stack.push(b);
+                visited.add(b);
+                currentStop.setIndex(nextIndex++);
+            } else {
+                stack.pop();
+            }
+        }
+
+        Collections.sort(stops);
+
+        Set<TransitStop> stopsThatIDontNeed = new HashSet<TransitStop>();
+        for (Iterator<TransitStop> i = stops.iterator(); i.hasNext();) {
+            TransitStop s = i.next();
+            if (s.getIndex() < 0) {
+                stopsThatIDontNeed.add(s);
+                i.remove();
+            }
+        }
+
+        return stopsThatIDontNeed;
+    }
+
+    private TransitStop findNextStop(TransitStop stop, double includedAngle, Set<TransitStop> visited) {
+
+        double closest = Constants.WGS_DISTANCE_5KM * 8;
+        TransitStop nextStop = null;
+        TransitStop whereIComeFrom = stop.getLinkedStopA();
+
+        if (whereIComeFrom == null) {
+            whereIComeFrom = stop.getLinkedStopB();
+        }
+        if (whereIComeFrom == null) {
+            // this is a stop with no links
+            for (TransitStop anotherStop : stops) {
+                double distance = stop.getDistanceFromStop(anotherStop);
+                if (anotherStop != stop && distance < closest) {
+                    nextStop = anotherStop;
+                    closest = distance;
+                }
+            }
+            return nextStop;
+        }
+
+        // This stop has at least one link
+        // compute the cosine between the two vectors
+        double x0 = stop.getStation().getNode().getCoord().getX();
+        double y0 = stop.getStation().getNode().getCoord().getY();
+        double x1 = whereIComeFrom.getStation().getNode().getCoord().getX();
+        double y1 = whereIComeFrom.getStation().getNode().getCoord().getY();
+        double dx0 = x1 - x0;
+        double dy0 = y1 - y0;
+        double dis1 = stop.getDistanceFromStop(whereIComeFrom);
+        for (TransitStop anotherStop : stops) {
+            double x2 = anotherStop.getStation().getNode().getCoord().getX();
+            double y2 = anotherStop.getStation().getNode().getCoord().getY();
+            double dx1 = x2 - x0;
+            double dy1 = y2 - y0;
+            if (anotherStop != stop && anotherStop != whereIComeFrom &&
+                    !(x0 == x2 && y0 == y2) && !visited.contains(anotherStop)) {
+                double distance = stop.getDistanceFromStop(anotherStop);
+                double angle = Math.acos((dx0 * dx1 + dy0 * dy1) / (dis1 * distance));
+                if (angle > includedAngle && distance < closest) {
+                    closest = distance;
+                    nextStop = anotherStop;
+                }
+            }
+        }
+        return nextStop;
     }
 
     /**

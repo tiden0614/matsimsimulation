@@ -1,8 +1,5 @@
 package com.mitsubishi.simulation.input.transit;
 
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Node;
-
 /**
  * Created by tiden on 7/9/2015.
  * This class represents a stop of a particular transit
@@ -14,14 +11,14 @@ public class TransitStop implements Comparable {
     private TransitStation station;
     private int index;
 
-    private TransitStop nearestStopInLine;
-    private TransitStop secNearestStopInLine;
+    private TransitStop linkedStopA;
+    private TransitStop linkedStopB;
 
     public TransitStop(TransitStation station, int index) {
         this.station = station;
         this.index = index;
-        this.nearestStopInLine = null;
-        this.secNearestStopInLine = null;
+        this.linkedStopA = null;
+        this.linkedStopB = null;
     }
 
     public TransitStation getStation() {
@@ -39,20 +36,20 @@ public class TransitStop implements Comparable {
         return -1;
     }
 
-    public TransitStop getNearestStopInLine() {
-        return nearestStopInLine;
+    public TransitStop getLinkedStopA() {
+        return linkedStopA;
     }
 
-    public TransitStop getSecNearestStopInLine() {
-        return secNearestStopInLine;
+    public TransitStop getLinkedStopB() {
+        return linkedStopB;
     }
 
-    public void setNearestStopInLine(TransitStop nearestStopInLine) {
-        this.nearestStopInLine = nearestStopInLine;
+    public void setLinkedStopA(TransitStop linkedStopA) {
+        this.linkedStopA = linkedStopA;
     }
 
-    public void setSecNearestStopInLine(TransitStop secNearestStopInLine) {
-        this.secNearestStopInLine = secNearestStopInLine;
+    public void setLinkedStopB(TransitStop linkedStopB) {
+        this.linkedStopB = linkedStopB;
     }
 
     public double getDistanceFromStop(TransitStop stop) {
@@ -68,7 +65,7 @@ public class TransitStop implements Comparable {
     }
 
     public boolean isMyNearestOrSecNearest(TransitStop stop) {
-        return stop == nearestStopInLine || stop == secNearestStopInLine;
+        return stop == linkedStopA || stop == linkedStopB;
     }
 
     @Override

@@ -15,6 +15,7 @@ import org.matsim.core.utils.geometry.CoordImpl;
 import org.xml.sax.Attributes;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Created by tiden on 7/14/2015.
@@ -34,18 +35,34 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
     private NLNIRailwayStation currentStation;
     private Map<String, NLNIRailwayStation> stations;
 
+    private NLNIRailwayLine currentLine;
     private Map<String, NLNIRailwayLine> lines;
 
     private Network network;
 
+    private int lineNameConflicts;
+
+    private Pattern debugPattern;
+
+    private Set<String> trainMode;
+    private Set<String> carMode;
+
     public NLNIRailwayTransitAdapter(String inputFile, Network network) {
+        // for debug use
+        debugPattern = Pattern.compile("\\d+$");
+
         this.network = network;
+        this.lineNameConflicts = 0;
 
         transits = new ArrayList<Transit>();
         transitStations = new HashMap<String, TransitStation>();
         curves = new HashMap<String, NLNICurve>();
         stations = new HashMap<String, NLNIRailwayStation>();
         lines = new HashMap<String, NLNIRailwayLine>();
+        trainMode = new HashSet<String>();
+        trainMode.add(TransportMode.pt);
+        carMode = new HashSet<String>();
+        carMode.add(TransportMode.car);
         setValidating(false);
 
         logger.info("Starting to load lines and stations from " + inputFile);
@@ -70,21 +87,24 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
 
         filterTransitStations();
 
+        Map<Transit, List<TransitStop>> discarded = Transit.getDiscardedStops();
         StringBuilder b = new StringBuilder("The following stops are discarded due to malformed data:");
         b.append(" (");
-        b.append(Transit.getNumDiscardedStops());
+        b.append(discarded);
         b.append(")\n");
-        for (Transit t : Transit.getDiscardedStops().keySet()) {
+        for (Transit t : discarded.keySet()) {
             b.append(t.getName());
             b.append("\n");
-            for (TransitStop stop : Transit.getDiscardedStops().get(t)) {
+            for (TransitStop stop : discarded.get(t)) {
                 b.append("\t");
                 b.append(stop.getStation().getName());
                 b.append("\n");
             }
         }
 
-        logger.warn(b.toString());
+//        logger.warn(b.toString());
+
+        logger.warn("There are " + lineNameConflicts + " line name conflicts");
     }
 
     public List<Transit> getTransits() {
@@ -139,20 +159,7 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
 
     private void convert() {
 
-        // for debug use
-        int loop = 0;
-        Set<Link> unusualLinks = new HashSet<Link>();
-        Set<String> carMode = new HashSet<String>();
-        carMode.add(TransportMode.car);
-
-        // Set the links of transits to allow public transport
-        Set<String> trainMode = new HashSet<String>();
-        trainMode.add(TransportMode.pt);
-
         for (NLNIRailwayLine line : lines.values()) {
-
-            // for debug use
-//            if (loop++ > 2) return;
 
             Transit transit = new Transit(Transit.TRAIN, line.getName());
             transit.setDuplexTransit(true);
@@ -180,52 +187,71 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
             }
 
             // rearrange the stops of this transit
-            transit.rearrangeStops();
+//            transit.rearrangeStops();
+            Set<TransitStop> stopsBeingKickedOut = transit.neoRearrangeStops();
 
             // after rearrangement, there might be some transits that we don't need anymore
-            if (transit.getStops().size() < 2) {
-                continue;
+            if (transit.getStops().size() >= 2) {
+                transits.add(transit);
             }
 
-            // create links and add them to the network
-            List<Link> forwardLinks = transit.getForwardLinks();
-            List<Link> backwardLinks = transit.getBackwardLinks();
-            TransitStation lastStation = null;
-            for (TransitStop stop : transit.getStops()) {
-                TransitStation transitStation = stop.getStation();
-                transitStation.getPassThroughTransitMap().put(transit, stop);
-                Set<String> allowedMode = trainMode;
-                if (lastStation != null) {
+            int index = 0;
+            while (stopsBeingKickedOut != null) {
+                Transit kicketOut = new Transit(Transit.TRAIN, transit.getName() + "_" + index++);
+                kicketOut.getStops().addAll(stopsBeingKickedOut);
 
-                    // unfortunately we have to do this cleaning for links
-                    // I have no idea where those extremely long links come from
-                    double distance = lastStation.getDistanceFrom(transitStation);
-                    if (distance > Constants.WGS_DISTANCE_5KM * 1600) {
-                        logger.warn("Found a super long distance " + distance + " in line " +
+                stopsBeingKickedOut = kicketOut.neoRearrangeStops();
+
+                if (kicketOut.getStops().size() >= 2) {
+                    transits.add(kicketOut);
+                }
+            }
+        }
+
+        for (Transit transit : transits) {
+            buildLinks(transit);
+        }
+
+    }
+
+    private void buildLinks(Transit transit) {
+        // create links and add them to the network
+        List<Link> forwardLinks = transit.getForwardLinks();
+        List<Link> backwardLinks = transit.getBackwardLinks();
+        TransitStation lastStation = null;
+        for (TransitStop stop : transit.getStops()) {
+            TransitStation transitStation = stop.getStation();
+            transitStation.getPassThroughTransitMap().put(transit, stop);
+            Set<String> allowedMode = trainMode;
+            if (lastStation != null) {
+
+                // unfortunately we have to do this cleaning for links
+                // I have no idea where those extremely long links come from
+                double distance = lastStation.getDistanceFrom(transitStation);
+                if (distance > Constants.WGS_DISTANCE_5KM * 1600) {
+                    logger.warn("Found a super long distance " + distance + " in line " +
                             transit.getName() + " between stations " +
                             lastStation.getName() + " -> " + transitStation.getName());
-                        allowedMode = carMode;
-                    }
-                    // since all data from NLNI are actual duplex trains
-                    // add both links from station A to station B and station B to station A
-                    Link link1 = network.getFactory().createLink(
-                            new IdImpl(getNextId()), lastStation.getNode(), transitStation.getNode()
-                    );
-                    Link link2 = network.getFactory().createLink(
-                            new IdImpl(getNextId()), transitStation.getNode(), lastStation.getNode()
-                    );
-                    link1.setAllowedModes(allowedMode);
-                    link2.setAllowedModes(allowedMode);
-                    forwardLinks.add(link1);
-                    backwardLinks.add(link2);
-                    synchronized (AbstractNLNITransitAdapter.class) {
-                        network.addLink(link1);
-                        network.addLink(link2);
-                    }
+                    allowedMode = carMode;
                 }
-                lastStation = transitStation;
+                // since all data from NLNI are actual duplex trains
+                // add both links from station A to station B and station B to station A
+                Link link1 = network.getFactory().createLink(
+                        new IdImpl(getNextId()), lastStation.getNode(), transitStation.getNode()
+                );
+                Link link2 = network.getFactory().createLink(
+                        new IdImpl(getNextId()), transitStation.getNode(), lastStation.getNode()
+                );
+                link1.setAllowedModes(allowedMode);
+                link2.setAllowedModes(allowedMode);
+                forwardLinks.add(link1);
+                backwardLinks.add(link2);
+                synchronized (AbstractNLNITransitAdapter.class) {
+                    network.addLink(link1);
+                    network.addLink(link2);
+                }
             }
-            transits.add(transit);
+            lastStation = transitStation;
         }
     }
 
@@ -234,8 +260,19 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
         if ("Curve".equals(name)) {
             currentCurve = new NLNICurve(atts.getValue("gml:id"));
         } else if ("Station".equals(name)) {
-            currentStation = new NLNIRailwayStation(atts.getValue("gml:id"));
+            String id = atts.getValue("gml:id");
+
+            // for debug use
+//            int last4Digitsigits = Integer.valueOf(id.split("_")[1]);
+//            if (last4Digits < 7189 || last4Digits > 7259) {
+//                currentStation = null;
+//                return;
+//            }
+
+
+            currentStation = new NLNIRailwayStation(id);
         } else if ("location".equals(name) && "Station".equals(context.peek())) {
+            if (currentStation == null) return;
             String refId = atts.getValue("xlink:href").substring(1);
             NLNICurve ref = curves.get(refId);
             currentStation.setX(ref.getXCenter());
@@ -255,11 +292,21 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
                     currentCurve.addNumber(Double.valueOf(posStr));
                 }
             }
-        } else if ("railwayLineName".equals(name) && "Station".equals(context.peek())) {
+        }
+
+        if (currentStation == null) {
+            return;
+        }
+
+        if ("railwayLineName".equals(name) && "Station".equals(context.peek())) {
             NLNIRailwayLine line = lines.get(content);
             if (line == null) {
                 line = new NLNIRailwayLine(content);
                 lines.put(content, line);
+                currentLine = line;
+            } else if (currentLine != line) {
+                lineNameConflicts++;
+                logger.warn("Found line name conflict: " + line.getName());
             }
             line.getStations().add(currentStation);
         } else if ("railwayType".equals(name) && "Station".equals(context.peek())) {
