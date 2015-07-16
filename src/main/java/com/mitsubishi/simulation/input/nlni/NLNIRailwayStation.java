@@ -8,6 +8,7 @@ public class NLNIRailwayStation {
 
     private String id;
     private String name;
+    private String railwayType;
     private double x;
     private double y;
 
@@ -41,6 +42,14 @@ public class NLNIRailwayStation {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getRailwayType() {
+        return railwayType;
+    }
+
+    public void setRailwayType(String railwayType) {
+        this.railwayType = railwayType;
     }
 
     @Override

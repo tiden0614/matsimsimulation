@@ -9,4 +9,5 @@ public class Constants {
     public static final double WGS_DISTANCE_5M = 0.00004521858;
     public static final double WGS_DISTANCE_1M = 0.000009043716;
     public static final double WGS_DISTANCE_500M = 0.004521858;
+    public static final double WGS_DISTANCE_5KM = 0.04521858;
 }

@@ -59,6 +59,10 @@ public class TransitStop implements Comparable {
         return station.getDistanceFrom(stop.getStation());
     }
 
+    public double getAngleFromStop(TransitStop stop) {
+        return station.getAngleFrom(stop.getStation());
+    }
+
     public void setIndex(int index) {
         this.index = index;
     }

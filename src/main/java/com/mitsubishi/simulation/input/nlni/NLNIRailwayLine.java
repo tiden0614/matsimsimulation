@@ -9,15 +9,24 @@ import java.util.*;
 public class NLNIRailwayLine {
 
     private String name;
+    private String railwayType;
     private List<NLNIRailwayStation> stations;
 
     public NLNIRailwayLine(String name) {
         this.name = name;
-        this.stations = new ArrayList<NLNIRailwayStation>();
+        this.stations = new LinkedList<NLNIRailwayStation>();
     }
 
     public String getName() {
         return name;
+    }
+
+    public String getRailwayType() {
+        return railwayType;
+    }
+
+    public void setRailwayType(String railwayType) {
+        this.railwayType = railwayType;
     }
 
     public List<NLNIRailwayStation> getStations() {

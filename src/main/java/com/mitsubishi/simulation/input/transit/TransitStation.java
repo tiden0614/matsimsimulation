@@ -41,14 +41,28 @@ public class TransitStation {
         return passThroughTransitMap;
     }
 
+    public double getAngleFrom(TransitStation station) {
+        if (station == this || station.getNode() == node) {
+            return 0;
+        }
+        double x1 = 100 * node.getCoord().getX();
+        double y1 = 100 * node.getCoord().getY();
+        double x2 = 100 * station.getNode().getCoord().getX();
+        double y2 = 100 * station.getNode().getCoord().getY();
+        if (x1 == x2 && y1 == y2) {
+            return 0;
+        }
+        return Math.atan2(y2 - y1, x2 - x1);
+    }
+
     public double getDistanceFrom(TransitStation station) {
         if (station == this || station.getNode() == node) {
             return 0;
         }
-        double x1 = node.getCoord().getX();
-        double y1 = node.getCoord().getY();
-        double x2 = station.getNode().getCoord().getX();
-        double y2 = station.getNode().getCoord().getY();
+        double x1 = 100 * node.getCoord().getX();
+        double y1 = 100 * node.getCoord().getY();
+        double x2 = 100 * station.getNode().getCoord().getX();
+        double y2 = 100 * station.getNode().getCoord().getY();
         return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
     }
 

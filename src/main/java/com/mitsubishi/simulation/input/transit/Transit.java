@@ -1,5 +1,6 @@
 package com.mitsubishi.simulation.input.transit;
 
+import com.mitsubishi.simulation.utils.Constants;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.network.Link;
 
@@ -14,6 +15,17 @@ public class Transit {
     public static final String TRAIN = "train";
 
     private static final Logger logger = Logger.getLogger(Transit.class);
+
+    private static Map<Transit, List<TransitStop>> discardedStops = new HashMap<Transit, List<TransitStop>>();
+    private static int numDiscardedStops = 0;
+
+    public static int getNumDiscardedStops() {
+        return numDiscardedStops;
+    }
+
+    public static Map<Transit, List<TransitStop>> getDiscardedStops() {
+        return discardedStops;
+    }
 
     // That if this transit is a duplex transit affects how the transit schedule file is generated
     // and also how the routing algorithm behaves
@@ -32,7 +44,7 @@ public class Transit {
         this.duplexTransit = false;
         this.type = type;
         this.name = name;
-        this.stops = new ArrayList<TransitStop>();
+        this.stops = new LinkedList<TransitStop>();
         this.forwardLinks = new ArrayList<Link>();
         this.backwardLinks = null;
         this.possibleTransferMap = new LinkedHashMap<String, List<Transfer>>();
@@ -162,15 +174,35 @@ public class Transit {
                 }
             }
 
-            // find the 2nd nearest
+            double x0 = nearest.getStation().getNode().getCoord().getX();
+            double y0 = nearest.getStation().getNode().getCoord().getY();
+
+            // find the 2nd nearest whose direction should be opposite from the nearest
             minDistance = Double.MAX_VALUE;
             TransitStop secNearest = null;
             for (TransitStop anotherStop : stops) {
                 if (anotherStop != stop && anotherStop != nearest) {
                     double distance = stop.getDistanceFromStop(anotherStop);
-                    if (distance < minDistance) {
+                    double x1 = anotherStop.getStation().getNode().getCoord().getX();
+                    double y1 = anotherStop.getStation().getNode().getCoord().getY();
+                    double angle = Math.abs(Math.atan2(y0 - y1, x0 - x1)) % Math.PI;
+                    if (distance < minDistance && angle > Math.PI / 4) {
                         minDistance = distance;
                         secNearest = anotherStop;
+                    }
+                }
+            }
+
+            // if cannot find such a stop, alleviate the angle restriction
+            if (secNearest == null) {
+                minDistance = Double.MAX_VALUE;
+                for (TransitStop anotherStop : stops) {
+                    if (anotherStop != stop && anotherStop != nearest) {
+                        double distance = stop.getDistanceFromStop(anotherStop);
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            secNearest = anotherStop;
+                        }
                     }
                 }
             }
@@ -207,16 +239,13 @@ public class Transit {
                 return;
             }
 
-            if (!stop.getNearestStopInLine().isMyNearestOrSecNearest(stop)) {
-                stop.setNearestStopInLine(null);
-            }
             if (!stop.getSecNearestStopInLine().isMyNearestOrSecNearest(stop)) {
                 stop.setSecNearestStopInLine(null);
             }
-            // If the above operation is correct, at least one of the nearest stops is not null
-            assert stop.getNearestStopInLine() != null || stop.getSecNearestStopInLine() != null;
+            // If the above operation is correct, at least the nearest stops is not null
+            assert stop.getNearestStopInLine() != null;
             // find one end of the line
-            if (stop.getNearestStopInLine() == null || stop.getSecNearestStopInLine() == null) {
+            if (stop.getSecNearestStopInLine() == null) {
                 currentStop = stop;
             }
         }
@@ -259,6 +288,21 @@ public class Transit {
         // Sort the stops according to their indexes
         // The time complexity of this operation is O(n*logn) (hopefully:)
         Collections.sort(stops);
+
+        // Unfortunately we have to remove those stops who have negative indexes
+        for (Iterator<TransitStop> i = stops.iterator(); i.hasNext();) {
+            TransitStop stop = i.next();
+            if (stop.getIndex() < 0) {
+                List<TransitStop> discarded = discardedStops.get(this);
+                if (discarded == null) {
+                    discarded = new ArrayList<TransitStop>();
+                    discardedStops.put(this, discarded);
+                }
+                discarded.add(stop);
+                numDiscardedStops++;
+                i.remove();
+            }
+        }
     }
 
     /**
