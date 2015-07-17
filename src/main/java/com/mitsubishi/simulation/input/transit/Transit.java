@@ -19,9 +19,12 @@ public class Transit {
     private static Map<Transit, List<TransitStop>> discardedStops = new HashMap<Transit, List<TransitStop>>();
     private static int numDiscardedStops = 0;
 
+    private static final int searchRangeFactor = 30;
+
     public static int getNumDiscardedStops() {
         return numDiscardedStops;
     }
+
 
     public static Map<Transit, List<TransitStop>> getDiscardedStops() {
         return discardedStops;
@@ -323,7 +326,8 @@ public class Transit {
         Stack<TransitStop> stack = new Stack<TransitStop>();
         Set<TransitStop> visited = new HashSet<TransitStop>();
 
-        TransitStop currentStop = stops.get(0);
+        int tryAStop = 0;
+        TransitStop currentStop = stops.get(tryAStop++);
 
         stack.push(currentStop);
         visited.add(currentStop);
@@ -335,6 +339,28 @@ public class Transit {
             if (currentStop.getLinkedStopA() == null && currentStop.getLinkedStopB() == null) {
                 // this is a start point; let's just find the closest stop without an angle
                 TransitStop nextStop = findNextStop(currentStop, 0, visited);
+                if (nextStop == null) {
+                    if (tryAStop < stops.size()) {
+                        // Cannot find a closest stop for this one; let's try another stop
+                        stack.pop();
+                        stack.push(stops.get(tryAStop++));
+                        continue;
+                    }
+                    // Cannot even find a closest stop for every stop in this transit; discard these this transit and its stops
+                    StringBuilder b = new StringBuilder("Cannot find a closest stop within ");
+                    b.append(searchRangeFactor);
+                    b.append("KM radius area for every stop of Transit ");
+                    b.append(this.name);
+                    b.append("; discard the Transit with stops as following:\n");
+                    for (TransitStop stop : stops) {
+                        b.append("\t");
+                        b.append(stop.getStation().getName());
+                        b.append("\n");
+                    }
+                    logger.warn(b.toString());
+                    this.stops.clear();
+                    return null;
+                }
                 currentStop.setLinkedStopB(nextStop);
                 if (nextStop.getLinkedStopA() == null) {
                     nextStop.setLinkedStopA(currentStop);
@@ -350,12 +376,12 @@ public class Transit {
                 if (nextStop == null) {
                     nextStop = findNextStop(currentStop, Math.PI / 3, visited);
                 }
-                if (nextStop == null) {
-                    nextStop = findNextStop(currentStop, Math.PI / 4, visited);
-                }
-                if (nextStop == null) {
-                    nextStop = findNextStop(currentStop, Math.PI / 6, visited);
-                }
+//                if (nextStop == null) {
+//                    nextStop = findNextStop(currentStop, Math.PI / 4, visited);
+//                }
+//                if (nextStop == null) {
+//                    nextStop = findNextStop(currentStop, Math.PI / 6, visited);
+//                }
                 if (nextStop == null) {
                     // OK, we find an endpoint, pop this stop
                     endPoint = currentStop;
@@ -392,8 +418,9 @@ public class Transit {
 
         stack.push(endPoint);
         visited.add(endPoint);
+        endPoint.setIndex(0);
 
-        int nextIndex = 0;
+        int nextIndex = 1;
 
         while (!stack.isEmpty()) {
             currentStop = stack.peek();
@@ -402,11 +429,11 @@ public class Transit {
             if (a != null && !visited.contains(a)) {
                 stack.push(a);
                 visited.add(a);
-                currentStop.setIndex(nextIndex++);
+                a.setIndex(nextIndex++);
             } else if (b != null && !visited.contains(b)) {
                 stack.push(b);
                 visited.add(b);
-                currentStop.setIndex(nextIndex++);
+                b.setIndex(nextIndex++);
             } else {
                 stack.pop();
             }
@@ -428,7 +455,7 @@ public class Transit {
 
     private TransitStop findNextStop(TransitStop stop, double includedAngle, Set<TransitStop> visited) {
 
-        double closest = Constants.WGS_DISTANCE_5KM * 8;
+        double closest = Constants.WGS_DISTANCE_1KM * searchRangeFactor;
         TransitStop nextStop = null;
         TransitStop whereIComeFrom = stop.getLinkedStopA();
 

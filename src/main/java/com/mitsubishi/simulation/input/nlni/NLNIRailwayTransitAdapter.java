@@ -11,11 +11,11 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.basic.v01.IdImpl;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.NodeImpl;
+import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.geometry.CoordImpl;
 import org.xml.sax.Attributes;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * Created by tiden on 7/14/2015.
@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
 
     private static final Logger logger = Logger.getLogger(NLNIRailwayTransitAdapter.class);
+    private static final int longDistanceFactor = 10;
 
     private List<Transit> transits;
     private Map<String, TransitStation> transitStations;
@@ -35,24 +36,22 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
     private NLNIRailwayStation currentStation;
     private Map<String, NLNIRailwayStation> stations;
 
-    private NLNIRailwayLine currentLine;
     private Map<String, NLNIRailwayLine> lines;
 
     private Network network;
 
-    private int lineNameConflicts;
-
-    private Pattern debugPattern;
-
     private Set<String> trainMode;
-    private Set<String> carMode;
+    private Set<String> trainAndCarMode;
+    private QuadTree.Rect boundary;
 
     public NLNIRailwayTransitAdapter(String inputFile, Network network) {
-        // for debug use
-        debugPattern = Pattern.compile("\\d+$");
+        this(inputFile, network, null);
+    }
+
+    public NLNIRailwayTransitAdapter(String inputFile, Network network, QuadTree.Rect boundary) {
 
         this.network = network;
-        this.lineNameConflicts = 0;
+        this.boundary = boundary;
 
         transits = new ArrayList<Transit>();
         transitStations = new HashMap<String, TransitStation>();
@@ -61,8 +60,9 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
         lines = new HashMap<String, NLNIRailwayLine>();
         trainMode = new HashSet<String>();
         trainMode.add(TransportMode.pt);
-        carMode = new HashSet<String>();
-        carMode.add(TransportMode.car);
+        trainAndCarMode = new HashSet<String>();
+        trainAndCarMode.add(TransportMode.car);
+        trainAndCarMode.add(TransportMode.pt);
         setValidating(false);
 
         logger.info("Starting to load lines and stations from " + inputFile);
@@ -86,25 +86,6 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
         logger.info(transits.size() + " Transits and " + transitStations.size() + " TransitStations are generated");
 
         filterTransitStations();
-
-        Map<Transit, List<TransitStop>> discarded = Transit.getDiscardedStops();
-        StringBuilder b = new StringBuilder("The following stops are discarded due to malformed data:");
-        b.append(" (");
-        b.append(discarded);
-        b.append(")\n");
-        for (Transit t : discarded.keySet()) {
-            b.append(t.getName());
-            b.append("\n");
-            for (TransitStop stop : discarded.get(t)) {
-                b.append("\t");
-                b.append(stop.getStation().getName());
-                b.append("\n");
-            }
-        }
-
-//        logger.warn(b.toString());
-
-        logger.warn("There are " + lineNameConflicts + " line name conflicts");
     }
 
     public List<Transit> getTransits() {
@@ -129,13 +110,42 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
     }
 
     private void filterRawData() {
-        Iterator<Map.Entry<String, NLNIRailwayLine>> iterator = lines.entrySet().iterator();
+
+        // If we have a boundary defined, filter out those points that fall outside the boundary
+        if (boundary != null) {
+            double minX = boundary.minX;
+            double minY = boundary.minY;
+            double maxX = boundary.maxX;
+            double maxY = boundary.maxY;
+            Iterator<Map.Entry<String, NLNIRailwayStation>> stationIter = stations.entrySet().iterator();
+            while (stationIter.hasNext()) {
+                Map.Entry<String, NLNIRailwayStation> entry = stationIter.next();
+                double x = entry.getValue().getX();
+                double y = entry.getValue().getY();
+                if (!(minX <= x && x <= maxX && minY <= y && y <= maxY)) {
+                    // mark the station as deleted and then delete it from the map
+                    // the reason for marking is that we need to delete it from the line later
+                    entry.getValue().setDeleted(true);
+                    stationIter.remove();
+                }
+            }
+        }
+
+        // Split those lines who has more than one type of stations
+        // Create a new line for each corresponding type of stations
+        Iterator<Map.Entry<String, NLNIRailwayLine>> lineIter = lines.entrySet().iterator();
         Map<String, NLNIRailwayLine> toBeAdded = new HashMap<String, NLNIRailwayLine>();
-        while (iterator.hasNext()) {
-            Map.Entry<String, NLNIRailwayLine> entry = iterator.next();
+        while (lineIter.hasNext()) {
+            Map.Entry<String, NLNIRailwayLine> entry = lineIter.next();
             Map<String, List<NLNIRailwayStation>> stationCategories = new HashMap<String, List<NLNIRailwayStation>>();
             NLNIRailwayLine l = entry.getValue();
-            for (NLNIRailwayStation station : l.getStations()) {
+            for (Iterator<NLNIRailwayStation> sIter = l.getStations().iterator(); sIter.hasNext();) {
+                NLNIRailwayStation station = sIter.next();
+                if (station.isDeleted()) {
+                    // If this station is marked as deleted, remove it from this line
+                    sIter.remove();
+                    continue;
+                }
                 String stationType = station.getRailwayType();
                 List<NLNIRailwayStation> slist = stationCategories.get(stationType);
                 if (slist == null) {
@@ -144,8 +154,14 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
                 }
                 slist.add(station);
             }
+            if (l.getStations().size() < 2) {
+                // This line may have none or only one station left due to the filter operation
+                // If so, remove this line
+                lineIter.remove();
+                continue;
+            }
             if (stationCategories.size() > 1) {
-                iterator.remove();
+                lineIter.remove();
                 for (Map.Entry<String, List<NLNIRailwayStation>> e : stationCategories.entrySet()) {
                     String neoName = l.getName() + "_" + e.getKey();
                     NLNIRailwayLine neoLine = new NLNIRailwayLine(neoName);
@@ -196,14 +212,15 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
             }
 
             int index = 0;
-            while (stopsBeingKickedOut != null) {
-                Transit kicketOut = new Transit(Transit.TRAIN, transit.getName() + "_" + index++);
-                kicketOut.getStops().addAll(stopsBeingKickedOut);
+            while (stopsBeingKickedOut != null && stopsBeingKickedOut.size() > 1) {
+                Transit kickedOut = new Transit(Transit.TRAIN, transit.getName() + "_" + index++);
+                kickedOut.setDuplexTransit(true);
+                kickedOut.getStops().addAll(stopsBeingKickedOut);
 
-                stopsBeingKickedOut = kicketOut.neoRearrangeStops();
+                stopsBeingKickedOut = kickedOut.neoRearrangeStops();
 
-                if (kicketOut.getStops().size() >= 2) {
-                    transits.add(kicketOut);
+                if (kickedOut.getStops().size() >= 2) {
+                    transits.add(kickedOut);
                 }
             }
         }
@@ -225,14 +242,13 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
             Set<String> allowedMode = trainMode;
             if (lastStation != null) {
 
-                // unfortunately we have to do this cleaning for links
-                // I have no idea where those extremely long links come from
                 double distance = lastStation.getDistanceFrom(transitStation);
-                if (distance > Constants.WGS_DISTANCE_5KM * 1600) {
-                    logger.warn("Found a super long distance " + distance + " in line " +
-                            transit.getName() + " between stations " +
-                            lastStation.getName() + " -> " + transitStation.getName());
-                    allowedMode = carMode;
+                if (distance > Constants.WGS_DISTANCE_1KM * longDistanceFactor) {
+                    logger.warn(String.format("Found a super long distance (>%dKM) %.2fKM " +
+                            "in line %s between stations %s -> %s", longDistanceFactor,
+                            distance / Constants.WGS_DISTANCE_1KM, transit.getName(), lastStation.getName(),
+                            transitStation.getName()));
+                    allowedMode = trainAndCarMode;
                 }
                 // since all data from NLNI are actual duplex trains
                 // add both links from station A to station B and station B to station A
@@ -303,10 +319,6 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
             if (line == null) {
                 line = new NLNIRailwayLine(content);
                 lines.put(content, line);
-                currentLine = line;
-            } else if (currentLine != line) {
-                lineNameConflicts++;
-                logger.warn("Found line name conflict: " + line.getName());
             }
             line.getStations().add(currentStation);
         } else if ("railwayType".equals(name) && "Station".equals(context.peek())) {

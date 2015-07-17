@@ -11,6 +11,7 @@ public class NLNIRailwayStation {
     private String railwayType;
     private double x;
     private double y;
+    private boolean deleted;
 
     public NLNIRailwayStation(String id) {
         this.id = id;
@@ -50,6 +51,14 @@ public class NLNIRailwayStation {
 
     public void setRailwayType(String railwayType) {
         this.railwayType = railwayType;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     @Override
