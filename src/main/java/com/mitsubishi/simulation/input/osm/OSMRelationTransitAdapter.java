@@ -137,8 +137,7 @@ public class OSMRelationTransitAdapter implements TransitAdapter {
         }
         // add cached stops to the map
         transitStations.putAll(stationsToAdd);
-        // add links to the transit
-        List<Link> links = t.getLinks();
+        // add links to the network
         for (int j = 0; j < size - 1; j++) {
             Node from = stops.get(j).getStation().getNode();
             Node to = stops.get(j + 1).getStation().getNode();
@@ -157,7 +156,6 @@ public class OSMRelationTransitAdapter implements TransitAdapter {
                 connection = network.getFactory().createLink(new IdImpl(unusedId--), from, to);
                 network.addLink(connection);
             }
-            links.add(connection);
         }
         return t;
     }

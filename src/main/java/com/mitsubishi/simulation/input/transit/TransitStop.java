@@ -1,5 +1,7 @@
 package com.mitsubishi.simulation.input.transit;
 
+import org.matsim.api.core.v01.network.Link;
+
 /**
  * Created by tiden on 7/9/2015.
  * This class represents a stop of a particular transit
@@ -66,6 +68,14 @@ public class TransitStop implements Comparable {
 
     public boolean isMyNearestOrSecNearest(TransitStop stop) {
         return stop == linkedStopA || stop == linkedStopB;
+    }
+
+    public Link getLinkTo(TransitStop stop) {
+        return station.getNode().getOutLinks().get(stop.getStation().getNode().getId());
+    }
+
+    public Link getLinkFrom(TransitStop stop) {
+        return station.getNode().getInLinks().get(stop.getStation().getNode().getId());
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.mitsubishi.simulation.input.transit;
 import com.mitsubishi.simulation.utils.Constants;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Node;
 
 import java.util.*;
 
@@ -38,19 +39,19 @@ public class Transit {
     private String type;
     private String name;
     private List<TransitStop> stops;
-    private List<Link> forwardLinks;
-    private List<Link> backwardLinks;
     // used to store edges in an directed graph
     private Map<String, List<Transfer>> possibleTransferMap;
+    // The speed of this transit; the unit is km/h
+    private double speed;
 
     public Transit(String type, String name) {
         this.duplexTransit = false;
         this.type = type;
         this.name = name;
         this.stops = new LinkedList<TransitStop>();
-        this.forwardLinks = new ArrayList<Link>();
-        this.backwardLinks = null;
         this.possibleTransferMap = new LinkedHashMap<String, List<Transfer>>();
+        // we give a default speed to this transit by 120 km/h
+        this.speed = 120;
     }
 
     public String getType() {
@@ -69,31 +70,24 @@ public class Transit {
         return stops;
     }
 
-    public List<Link> getForwardLinks() {
-        return forwardLinks;
-    }
-
-    public List<Link> getBackwardLinks() {
-        return backwardLinks;
-    }
-
-    public List<Link> getLinks() {
-        return forwardLinks;
-    }
-
     public Map<String, List<Transfer>> getPossibleTransferMap() {
         return possibleTransferMap;
     }
 
     public void setDuplexTransit(boolean duplexTransit) {
         this.duplexTransit = duplexTransit;
-        if (duplexTransit && this.backwardLinks == null) {
-            this.backwardLinks = new ArrayList<Link>();
-        }
     }
 
     public boolean isDuplexTransit() {
         return duplexTransit;
+    }
+
+    public double getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(double speed) {
+        this.speed = speed;
     }
 
     /**

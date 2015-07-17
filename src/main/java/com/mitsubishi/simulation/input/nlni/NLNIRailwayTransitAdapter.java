@@ -179,6 +179,8 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
 
             Transit transit = new Transit(Transit.TRAIN, line.getName());
             transit.setDuplexTransit(true);
+            // Assume the train can run at a speed of 270 km/h
+            transit.setSpeed(270);
 
             // create nodes and add them to the network
             // create stations
@@ -215,6 +217,8 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
             while (stopsBeingKickedOut != null && stopsBeingKickedOut.size() > 1) {
                 Transit kickedOut = new Transit(Transit.TRAIN, transit.getName() + "_" + index++);
                 kickedOut.setDuplexTransit(true);
+                // Assume the train can run at a speed of 270 km/h
+                kickedOut.setSpeed(270);
                 kickedOut.getStops().addAll(stopsBeingKickedOut);
 
                 stopsBeingKickedOut = kickedOut.neoRearrangeStops();
@@ -233,8 +237,6 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
 
     private void buildLinks(Transit transit) {
         // create links and add them to the network
-        List<Link> forwardLinks = transit.getForwardLinks();
-        List<Link> backwardLinks = transit.getBackwardLinks();
         TransitStation lastStation = null;
         for (TransitStop stop : transit.getStops()) {
             TransitStation transitStation = stop.getStation();
@@ -260,8 +262,6 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
                 );
                 link1.setAllowedModes(allowedMode);
                 link2.setAllowedModes(allowedMode);
-                forwardLinks.add(link1);
-                backwardLinks.add(link2);
                 synchronized (AbstractNLNITransitAdapter.class) {
                     network.addLink(link1);
                     network.addLink(link2);
