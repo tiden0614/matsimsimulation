@@ -153,16 +153,26 @@ public class TransitWriter extends MatsimXmlWriter {
         writeEndTag("transportMode");
 
 
-        List<Id> linkIds = new ArrayList<Id>();
-        writeRouteProfile(transit, linkIds, false);
+        List<Id> forwardLinkIds = new ArrayList<Id>();
+        writeRouteProfile(transit, forwardLinkIds, false);
 
         writeEndTag("transitRoute");
 
-        // Write forward route
-        List<Tuple<String, String>> transitRouteBackwardIdAttr = new ArrayList<Tuple<String, String>>(1);
-        transitRouteBackwardIdAttr.add(createTuple("id", "backward"));
-        writeStartTag("transitRoute", transitRouteBackwardIdAttr);
-        writeEndTag("transitRoute");
+        if (transit.isDuplexTransit()) {
+            // Write forward route
+            List<Tuple<String, String>> transitRouteBackwardIdAttr = new ArrayList<Tuple<String, String>>(1);
+            transitRouteBackwardIdAttr.add(createTuple("id", "backward"));
+            writeStartTag("transitRoute", transitRouteBackwardIdAttr);
+
+            writeStartTag("transportMode", null);
+            writeContent(transit.getType(), false);
+            writeEndTag("transportMode");
+
+            List<Id> backwardLinkIds = new ArrayList<Id>();
+            writeRouteProfile(transit, backwardLinkIds, true);
+
+            writeEndTag("transitRoute");
+        }
 
         writeEndTag("transitLine");
     }
