@@ -291,8 +291,9 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
             if (currentStation == null) return;
             String refId = atts.getValue("xlink:href").substring(1);
             NLNICurve ref = curves.get(refId);
-            currentStation.setX(ref.getXCenter());
-            currentStation.setY(ref.getYCenter());
+            // The x and y are actually reversed for longitude and latitude
+            currentStation.setX(ref.getYCenter());
+            currentStation.setY(ref.getXCenter());
         }
     }
 
