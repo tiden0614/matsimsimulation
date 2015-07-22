@@ -25,14 +25,14 @@ public class TransitLineRouteStop {
     }
 
     public String getArrivalOffset() {
-        if (arrivalOffset > 0) {
+        if (arrivalOffset >= 0) {
             return String.format("%02d:%02d:%02d", arrivalOffset / 3600, arrivalOffset / 60, arrivalOffset % 60);
         }
         return null;
     }
 
     public String getDepartureOffset() {
-        if (departureOffset > 0) {
+        if (departureOffset >= 0) {
             return String.format("%02d:%02d:%02d", departureOffset / 3600, departureOffset / 60, departureOffset % 60);
         }
         return null;
