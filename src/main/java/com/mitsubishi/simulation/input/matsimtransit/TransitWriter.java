@@ -1,12 +1,15 @@
 package com.mitsubishi.simulation.input.matsimtransit;
 
+import com.mitsubishi.simulation.input.nlni.NLNIRailwayTransitAdapter;
 import com.mitsubishi.simulation.input.transit.Transit;
 import com.mitsubishi.simulation.input.transit.TransitStop;
 import com.mitsubishi.simulation.utils.Constants;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.core.network.NetworkUtils;
+import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.CoordImpl;
 import org.matsim.core.utils.io.MatsimXmlWriter;
@@ -28,26 +31,30 @@ import java.util.Random;
 public class TransitWriter extends MatsimXmlWriter {
 
     private static final Logger logger = Logger.getLogger(TransitWriter.class);
+    private static final String DEFAULT_SCHEDULE_FILE_NAME = "transitSchedule.xml";
+    private static final String DEFAULT_VEHICLES_FILE_NAME = "transitVehicles.xml";
 
     private String schedulePath;
     private String vehiclesPath;
-    private List<Transit> transits;
-    private List<StopFacility> stopFacilities;
-    private long idGen;
+    private List<TransitLine> transitLines;
+
+    public TransitWriter(String outputDir, List<Transit> transits) {
+        this(
+                outputDir + System.getProperty("file.separator") + DEFAULT_SCHEDULE_FILE_NAME,
+                outputDir + System.getProperty("file.separator") + DEFAULT_VEHICLES_FILE_NAME,
+                transits
+        );
+    }
 
     public TransitWriter(String schedulePath, String vehiclesPath, List<Transit> transits) {
         this.schedulePath = schedulePath;
         this.vehiclesPath = vehiclesPath;
-        this.transits = transits;
-        this.idGen = 0;
-        this.stopFacilities = new ArrayList<StopFacility>();
-    }
+        this.transitLines = new ArrayList<TransitLine>();
 
-    private Coord generateRandomPointAroundPoint(double x, double y) {
-        double radius = Constants.WGS_DISTANCE_5M;
-        Random r = new Random();
-        double angle = 2 * r.nextDouble() * Math.PI;
-        return new CoordImpl(x + radius * Math.cos(angle), y + radius * Math.sin(angle));
+        // build transit lines
+        for (Transit transit : transits) {
+            transitLines.add(new TransitLine(transit));
+        }
     }
 
     private void writeStopFacility(StopFacility stopFacility) {
@@ -63,117 +70,175 @@ public class TransitWriter extends MatsimXmlWriter {
         writeStartTag("stopFacility", attrs, true);
     }
 
-    private void writeRouteProfile(Transit transit, List<Id> linkIds, boolean backwards) {
-        // Let's just focus on transits that have more than two stops
-        assert transit.getStops().size() > 1;
-
-        writeStartTag("routeProfile", null);
-
-        String departureOffset = "00:01:00";
-        int i = 0;
-        int size = transit.getStops().size();
-        int start = 0;
-        int end = size - 1;
-        if (backwards) {
-            start = size - 1;
-            end = 0;
-            i = transit.getStops().size() - 1;
+    private void writeStop(TransitLineRouteStop stop) {
+        List<Tuple<String, String>> attrs = new ArrayList<Tuple<String, String>>(3);
+        attrs.add(createTuple("refId", stop.getRefId()));
+        if (stop.getArrivalOffset() != null) {
+            attrs.add(createTuple("arrivalOffset", stop.getArrivalOffset()));
         }
-        boolean stopLoop = false;
-        StopFacility firstFacility = null;
-        while (!stopLoop) {
-
-            TransitStop stop = transit.getStops().get(i);
-            // generate stop facility
-            Coord coord = stop.getStation().getNode().getCoord();
-            if (stop.getStation().getPassThroughTransits().size() > 1) {
-                coord = generateRandomPointAroundPoint(coord.getX(), coord.getY());
-            }
-            StopFacility stopFacility = new StopFacility(
-                    String.valueOf(idGen++),
-                    coord.getX(),
-                    coord.getY(),
-                    stop.getStation().getName()
-            );
-            stopFacilities.add(stopFacility);
-
-            List<Tuple<String, String>> stopAttrs = new ArrayList<Tuple<String, String>>(3);
-            stopAttrs.add(createTuple("refId", stopFacility.getId()));
-
-            if (i == start) {
-                firstFacility = stopFacility;
-            }
-
-            if (i != start) {
-                TransitStop lastStop = transit.getStops().get(i - 1);
-                Id refLinkId = lastStop.getLinkTo(stop).getId();
-                linkIds.add(refLinkId);
-                stopFacility.setLinkRefId(refLinkId.toString());
-                if (firstFacility.getLinkRefId() == null) {
-                    firstFacility.setLinkRefId(refLinkId.toString());
-                }
-
-                // calculate arrivalOffset
-                double distance = lastStop.getDistanceFromStop(stop);
-                int seconds = (int) (((distance / Constants.WGS_DISTANCE_1KM) / transit.getSpeed()) * 3600);
-                String arrivalOffset = String.format("%2d:%2d:%2d", seconds / 3600, seconds / 60, seconds % 60);
-                stopAttrs.add(createTuple("arrivalOffset", arrivalOffset));
-
-                if (i != end) {
-                    stopAttrs.add(createTuple("departureOffset", departureOffset));
-                }
-            }
-
-            writeStartTag("stop", stopAttrs, true);
-            if (backwards) {
-                i--;
-                stopLoop = i < 0;
-            } else {
-                i++;
-                stopLoop = i >= size;
-            }
+        if (stop.getDepartureOffset() != null) {
+            attrs.add(createTuple("departureOffset", stop.getDepartureOffset()));
         }
-        stopFacilities.get(0).setLinkRefId(linkIds.get(0).toString());
-
-        writeEndTag("routeProfile");
+        writeStartTag("stop", attrs, true);
     }
 
-    private void writeTransitLine(Transit transit) {
-        List<Tuple<String, String>> transitLineIdAttr = new ArrayList<Tuple<String, String>>(1);
-        transitLineIdAttr.add(createTuple("id", transit.getName()));
-        writeStartTag("transitLine", transitLineIdAttr);
+    private void writeDeparture(TransitLineRouteDeparture departure) {
+        List<Tuple<String, String>> attrs = new ArrayList<Tuple<String, String>>(3);
+        attrs.add(createTuple("id", departure.getId()));
+        attrs.add(createTuple("departureTime", departure.getDepartureTime()));
+        attrs.add(createTuple("vehicleRefId", departure.getVehicleRefId()));
+        writeStartTag("departure", attrs, true);
+    }
 
-        // Write forward route
-        List<Tuple<String, String>> transitRouteForwardIdAttr = new ArrayList<Tuple<String, String>>(1);
-        transitRouteForwardIdAttr.add(createTuple("id", "forward"));
-        writeStartTag("transitRoute", transitRouteForwardIdAttr);
+    private void writeTransitLineRoute(TransitLineRoute route) {
+        List<Tuple<String, String>> attrs = new ArrayList<Tuple<String, String>>();
 
+        // write the open tag for transitRoute
+        attrs.add(createTuple("id", route.getId()));
+        writeStartTag("transitRoute", attrs);
+
+        // write the transportMode
         writeStartTag("transportMode", null);
-        writeContent(transit.getType(), false);
+        writeContent(route.getTransportMode(), false);
         writeEndTag("transportMode");
 
+        // write routProfile
+        writeStartTag("routeProfile", null);
+        for (TransitLineRouteStop stop : route.getRouteStops()) {
+            writeStop(stop);
+        }
+        writeEndTag("routeProfile");
 
-        List<Id> forwardLinkIds = new ArrayList<Id>();
-        writeRouteProfile(transit, forwardLinkIds, false);
+        // write route links
+        writeStartTag("route", null);
+        for (String linkRefId : route.getRouteLinks()) {
+            attrs.clear();
+            attrs.add(createTuple("refId", linkRefId));
+            writeStartTag("link", attrs, true);
+        }
+        writeEndTag("route");
 
+        // write departures
+        writeStartTag("departures", null);
+        for (TransitLineRouteDeparture departure : route.getDepartures()) {
+            writeDeparture(departure);
+        }
+        writeEndTag("departures");
+
+        // write the end tag for transitRoute
         writeEndTag("transitRoute");
+    }
 
-        if (transit.isDuplexTransit()) {
-            // Write forward route
-            List<Tuple<String, String>> transitRouteBackwardIdAttr = new ArrayList<Tuple<String, String>>(1);
-            transitRouteBackwardIdAttr.add(createTuple("id", "backward"));
-            writeStartTag("transitRoute", transitRouteBackwardIdAttr);
+    private void writeTransitLine(TransitLine line) {
+        List<Tuple<String, String>> transitLineIdAttr = new ArrayList<Tuple<String, String>>(1);
+        transitLineIdAttr.add(createTuple("id", line.getId()));
+        writeStartTag("transitLine", transitLineIdAttr);
 
-            writeStartTag("transportMode", null);
-            writeContent(transit.getType(), false);
-            writeEndTag("transportMode");
+        if (line.getForwardRoute() != null) {
+            writeTransitLineRoute(line.getForwardRoute());
+        }
 
-            List<Id> backwardLinkIds = new ArrayList<Id>();
-            writeRouteProfile(transit, backwardLinkIds, true);
-
-            writeEndTag("transitRoute");
+        if (line.getBackwardRoute() != null) {
+            writeTransitLineRoute(line.getBackwardRoute());
         }
 
         writeEndTag("transitLine");
+    }
+
+    public void writeTransitSchedule() {
+        openFile(this.schedulePath);
+        writeXmlHead();
+        writeDoctype("transitSchedule", "http://www.matsim.org/files/dtd/transitSchedule_v1.dtd");
+        writeStartTag("transitSchedule", null);
+
+        // write transitStops
+        writeStartTag("transitStops", null);
+        for (StopFacility facility : TransitLineRoute.getStopFacilities()) {
+            writeStopFacility(facility);
+        }
+        writeEndTag("transitStops");
+
+        // write transitLines
+        for (TransitLine line : transitLines) {
+            writeTransitLine(line);
+        }
+
+        writeEndTag("transitSchedule");
+        close();
+    }
+
+    public void writeTransitVehicles() {
+        openFile(this.vehiclesPath);
+        writeXmlHead();
+        List<Tuple<String, String>> attrs = new ArrayList<Tuple<String, String>>();
+        attrs.add(createTuple("xmlns", "http://www.matsim.org/files/dtd"));
+        attrs.add(createTuple("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance"));
+        attrs.add(createTuple("xsi:schemaLocation",
+                "http://www.matsim.org/files/dtd http://www.matsim.org/files/dtd/vehicleDefinitions_v1.0.xsd"));
+        writeStartTag("vehicleDefinitions", attrs);
+
+        // write vehicleTypes
+        for (TransitLine line : transitLines) {
+            attrs.clear();
+            attrs.add(createTuple("id", line.getId()));
+            writeStartTag("vehicleType", attrs);
+
+            writeStartTag("description", null);
+            // FIXME we need a real description here
+            writeContent(line.getId(), false);
+            writeEndTag("description");
+
+            writeStartTag("capacity", null);
+            attrs.clear();
+            attrs.add(createTuple("persons", line.getSeats()));
+            writeStartTag("seats", attrs, true);
+
+            attrs.clear();
+            attrs.add(createTuple("persons", line.getStandingRoom()));
+            writeStartTag("standingRoom", attrs, true);
+            writeEndTag("capacity");
+
+            attrs.clear();
+            attrs.add(createTuple("meter", line.getLength()));
+            writeStartTag("length", attrs, true);
+
+            writeEndTag("vehicleType");
+        }
+
+
+        // write actual vehicles
+        for (TransitLine line : transitLines) {
+            attrs.clear();
+            attrs.add(createTuple("type", line.getId()));
+            attrs.add(createTuple("id", ""));
+            if (line.getForwardRoute() != null) {
+                for (TransitLineRouteDeparture departure : line.getForwardRoute().getDepartures()) {
+                    attrs.set(1, createTuple("id", departure.getVehicleRefId()));
+                    writeStartTag("vehicle", attrs, true);
+                }
+            }
+            if (line.getBackwardRoute() != null) {
+                for (TransitLineRouteDeparture departure : line.getBackwardRoute().getDepartures()) {
+                    attrs.set(1, createTuple("id", departure.getVehicleRefId()));
+                    writeStartTag("vehicle", attrs, true);
+                }
+            }
+        }
+
+        writeEndTag("vehicleDefinitions");
+        close();
+    }
+
+    public static void main(String[] args) {
+        // for test use
+        String source = "NLNIInput/N02-13.xml";
+        String outputDir = "NLNIInput";
+        Network network = NetworkUtils.createNetwork();
+        // confine the area to Tokyo only
+        QuadTree.Rect boundary = new QuadTree.Rect(139.6864, 35.7405, 139.8450, 35.6210);
+        NLNIRailwayTransitAdapter adapter = new NLNIRailwayTransitAdapter(source, network, boundary);
+        TransitWriter writer = new TransitWriter(outputDir, adapter.getTransits());
+        writer.writeTransitSchedule();
+        writer.writeTransitVehicles();
     }
 }

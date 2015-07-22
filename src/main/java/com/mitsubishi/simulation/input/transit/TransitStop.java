@@ -1,6 +1,9 @@
 package com.mitsubishi.simulation.input.transit;
 
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
+
+import java.util.Map;
 
 /**
  * Created by tiden on 7/9/2015.
@@ -71,7 +74,13 @@ public class TransitStop implements Comparable {
     }
 
     public Link getLinkTo(TransitStop stop) {
-        return station.getNode().getOutLinks().get(stop.getStation().getNode().getId());
+        for (Map.Entry<Id, ? extends Link> entry : station.getNode().getOutLinks().entrySet()) {
+            Link l = entry.getValue();
+            if (l.getToNode().getId().equals(stop.getStation().getNode().getId())) {
+                return l;
+            }
+        }
+        return null;
     }
 
     public Link getLinkFrom(TransitStop stop) {

@@ -43,6 +43,7 @@ public class Transit {
     private Map<String, List<Transfer>> possibleTransferMap;
     // The speed of this transit; the unit is km/h
     private double speed;
+    private double lineDistance;
 
     public Transit(String type, String name) {
         this.duplexTransit = false;
@@ -52,6 +53,7 @@ public class Transit {
         this.possibleTransferMap = new LinkedHashMap<String, List<Transfer>>();
         // we give a default speed to this transit by 120 km/h
         this.speed = 120;
+        this.lineDistance = 0;
     }
 
     public String getType() {
@@ -412,7 +414,15 @@ public class Transit {
 
         stack.push(endPoint);
         visited.add(endPoint);
-        endPoint.setIndex(0);
+        // for debug use
+        // I still haven't figured out why this statement throws NullPointerException randomly
+        // FIXME The above assert statement should have intercepted this exception, but it doesn't
+        try {
+            endPoint.setIndex(0);
+        } catch (NullPointerException e) {
+            logger.error("WTF?", e);
+            throw e;
+        }
 
         int nextIndex = 1;
 
@@ -507,6 +517,21 @@ public class Transit {
             }
         }
         return null;
+    }
+
+    public double getLineDistance() {
+        if (this.lineDistance <= 0) {
+            // compute the total distance of this line
+            this.lineDistance = 0;
+            TransitStop lastStop = null;
+            for (TransitStop stop : stops) {
+                if (lastStop != null) {
+                    lineDistance += stop.getDistanceFromStop(lastStop);
+                }
+                lastStop = stop;
+            }
+        }
+        return this.lineDistance;
     }
 
     @Override
