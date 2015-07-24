@@ -4,6 +4,7 @@ import com.mitsubishi.simulation.utils.Constants;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Node;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 import java.util.*;
 
@@ -14,13 +15,16 @@ import java.util.*;
 public class Transit {
     public static final String BUS = "bus";
     public static final String TRAIN = "train";
+    public static final String ACCEPT_COORD_SYSTEM = TransformationFactory.CH1903_LV03;
+
+    private static final double DISTANCE_1M = Constants.get1MForCoordSystem(ACCEPT_COORD_SYSTEM);
 
     private static final Logger logger = Logger.getLogger(Transit.class);
 
     private static Map<Transit, List<TransitStop>> discardedStops = new HashMap<Transit, List<TransitStop>>();
     private static int numDiscardedStops = 0;
 
-    private static final int searchRangeFactor = 30;
+    private static final int searchRangeFactor = 30000;
 
     public static int getNumDiscardedStops() {
         return numDiscardedStops;
@@ -51,8 +55,8 @@ public class Transit {
         this.name = name;
         this.stops = new LinkedList<TransitStop>();
         this.possibleTransferMap = new LinkedHashMap<String, List<Transfer>>();
-        // we give a default speed to this transit by 120 km/h
-        this.speed = 120;
+        // we give a default speed to this transit by 60 km/h
+        this.speed = 60;
         this.lineDistance = 0;
     }
 
@@ -459,7 +463,7 @@ public class Transit {
 
     private TransitStop findNextStop(TransitStop stop, double includedAngle, Set<TransitStop> visited) {
 
-        double closest = Constants.WGS_DISTANCE_1KM * searchRangeFactor;
+        double closest = DISTANCE_1M * searchRangeFactor;
         TransitStop nextStop = null;
         TransitStop whereIComeFrom = stop.getLinkedStopA();
 

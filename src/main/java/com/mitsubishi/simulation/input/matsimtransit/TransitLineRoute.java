@@ -16,6 +16,8 @@ import java.util.Random;
  */
 public class TransitLineRoute {
 
+    private static final double DISTANCE_1M = Constants.get1MForCoordSystem(Transit.ACCEPT_COORD_SYSTEM);
+
     private static List<StopFacility> stopFacilities = new ArrayList<StopFacility>();
     private static int idGen = 0;
 
@@ -46,7 +48,7 @@ public class TransitLineRoute {
         setTransportMode(transit.getType());
         setId(backwards ? "backward" : "forward");
 
-        int departureOffset = 60;
+        int departureOffset = 30;
         int i = 0;
         int size = transit.getStops().size();
         int start = 0;
@@ -57,7 +59,6 @@ public class TransitLineRoute {
             i = transit.getStops().size() - 1;
         }
         boolean stopLoop = false;
-        StopFacility firstFacility = null;
         while (!stopLoop) {
 
             TransitStop stop = transit.getStops().get(i);
@@ -78,28 +79,36 @@ public class TransitLineRoute {
             routeStop.setRefId(stopFacility.getId());
 
             if (i == start) {
-                firstFacility = stopFacility;
                 routeStop.setDepartureOffset(0);
+                Id refLinkId = stop.getLinkTo(stop).getId();
+                routeLinks.add(refLinkId.toString());
+                stopFacility.setLinkRefId(refLinkId.toString());
             }
 
             if (i != start) {
-                int next = backwards? i + 1 : i - 1;
-                TransitStop lastStop = transit.getStops().get(next);
+                int last = backwards? i + 1 : i - 1;
+                TransitStop lastStop = transit.getStops().get(last);
                 Id refLinkId = lastStop.getLinkTo(stop).getId();
                 routeLinks.add(refLinkId.toString());
                 stopFacility.setLinkRefId(refLinkId.toString());
-                if (firstFacility.getLinkRefId() == null) {
-                    firstFacility.setLinkRefId(refLinkId.toString());
-                }
 
                 // calculate arrivalOffset
-                double distance = lastStop.getDistanceFromStop(stop);
-                int seconds = (int) (((distance / Constants.WGS_DISTANCE_1KM) / transit.getSpeed()) * 3600);
+                double distance = lastStop.getDistanceFromStop(stop) / (DISTANCE_1M * 1000);
+                int seconds = (int) ((distance / transit.getSpeed()) * 3600);
+                if (seconds < departureOffset) {
+                    // let's make sure that matsim doesn't add a midnight to this time T_T
+                    seconds += departureOffset;
+                }
                 routeStop.setArrivalOffset(seconds);
 
                 if (i != end) {
                     routeStop.setDepartureOffset(departureOffset);
                 }
+            }
+            if (i == end) {
+                Id refLinkId = stop.getLinkTo(stop).getId();
+                routeLinks.add(refLinkId.toString());
+                stopFacility.setLinkRefId(refLinkId.toString());
             }
 
             routeStops.add(routeStop);
@@ -111,12 +120,11 @@ public class TransitLineRoute {
                 stopLoop = i >= size;
             }
         }
-        stopFacilities.get(0).setLinkRefId(routeLinks.get(0));
 
 
         // generate transit departures
-        int firstEmit = 6 * 3600; // 6:00 AM
-        int lastEmit = 21 * 3600; // 9:00 PM
+        int firstEmit = 1 * 3600; // 01:00 AM
+        int lastEmit = 23 * 3600; // 12:00 PM
         int emitInterval = 15 * 60; // emit a transit every 15 minutes
 
         for (int t = firstEmit; t < lastEmit; t += emitInterval) {
@@ -130,7 +138,7 @@ public class TransitLineRoute {
     }
 
     private Coord generateRandomPointAroundPoint(double x, double y) {
-        double radius = Constants.WGS_DISTANCE_5M;
+        double radius = Constants.WGS_DISTANCE_5M * 4;
         Random r = new Random();
         double angle = 2 * r.nextDouble() * Math.PI;
         return new CoordImpl(x + radius * Math.cos(angle), y + radius * Math.sin(angle));

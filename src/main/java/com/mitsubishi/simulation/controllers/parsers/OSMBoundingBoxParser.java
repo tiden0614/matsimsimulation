@@ -13,13 +13,9 @@ public class OSMBoundingBoxParser extends MatsimXmlParser {
 
     private QuadTree.Rect boundingBox;
 
-    public OSMBoundingBoxParser() {
+    public OSMBoundingBoxParser(String filename) {
         this.setValidating(false);
-    }
-
-    public OSMBoundingBoxParser parseFluent(String filename) {
         this.parse(filename);
-        return this;
     }
 
     @Override

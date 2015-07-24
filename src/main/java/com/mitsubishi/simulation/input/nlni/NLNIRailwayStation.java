@@ -1,5 +1,7 @@
 package com.mitsubishi.simulation.input.nlni;
 
+import org.matsim.api.core.v01.Coord;
+
 /**
  * Created by tiden on 7/14/2015.
  * Represents a station element in National Land Numerical Information's data
@@ -59,6 +61,11 @@ public class NLNIRailwayStation {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public void setCoord(Coord coord) {
+        this.x = coord.getX();
+        this.y = coord.getY();
     }
 
     @Override

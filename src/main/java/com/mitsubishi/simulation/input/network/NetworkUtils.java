@@ -19,8 +19,12 @@ public class NetworkUtils {
 
     private static final Logger logger = Logger.getLogger(NetworkUtils.class);
 
+    public static Network convertOSMToNetwork(Network network, String osm, String osmCoord, String networkCoord) {
+        return convertOSMToNetwork(network, osm, osmCoord, networkCoord, false);
+    }
     public static Network convertOSMToNetwork(String osm, String osmCoord, String networkCoord) {
-        return convertOSMToNetwork(osm, osmCoord, networkCoord, false);
+        return convertOSMToNetwork(org.matsim.core.network.NetworkUtils.createNetwork(),
+                osm, osmCoord, networkCoord, false);
     }
 
     /**
@@ -35,21 +39,18 @@ public class NetworkUtils {
      * @param clean whether clean the network
      * @return the generated network object
      */
-    public static Network convertOSMToNetwork(String osm, String osmCoord, String networkCoord, boolean clean) {
+    public static Network convertOSMToNetwork(Network network, String osm, String osmCoord, String networkCoord, boolean clean) {
         logger.info(String.format("Converting OSM file [%s] into MATSim's network. " +
                 "Source coordinate system [%s]; target coordinate system [%s]",
                 osm, osmCoord, networkCoord));
-        Config config = ConfigUtils.createConfig();
-        Scenario sc = ScenarioUtils.createScenario(config);
-        Network net = sc.getNetwork();
         CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(osmCoord, networkCoord);
-        OsmNetworkReader onr = new OsmNetworkReader(net, ct);
+        OsmNetworkReader onr = new OsmNetworkReader(network, ct);
         onr.parse(osm);
         if (clean) {
-            new NetworkCleaner().run(net);
+            new NetworkCleaner().run(network);
         }
         logger.info("Successfully converted OSM file into MATSim's network.");
-        return net;
+        return network;
     }
 
     /**

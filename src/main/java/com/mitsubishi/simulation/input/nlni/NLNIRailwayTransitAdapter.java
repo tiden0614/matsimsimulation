@@ -13,6 +13,8 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.NodeImpl;
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.geometry.CoordImpl;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.geometry.transformations.WGS84toCH1903LV03;
 import org.xml.sax.Attributes;
 
 import java.util.*;
@@ -25,7 +27,8 @@ import java.util.*;
 public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
 
     private static final Logger logger = Logger.getLogger(NLNIRailwayTransitAdapter.class);
-    private static final int longDistanceFactor = 10;
+    private static final int LONG_DISTANCE_FACTOR = 10;
+    private static final int TRAIN_SPEED = 120; // 120km/h
 
     private List<Transit> transits;
     private Map<String, TransitStation> transitStations;
@@ -44,6 +47,8 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
     private Set<String> trainAndCarMode;
     private QuadTree.Rect boundary;
 
+    private CoordinateTransformation transformation = new WGS84toCH1903LV03();
+
     public NLNIRailwayTransitAdapter(String inputFile, Network network) {
         this(inputFile, network, null);
     }
@@ -51,7 +56,9 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
     public NLNIRailwayTransitAdapter(String inputFile, Network network, QuadTree.Rect boundary) {
 
         this.network = network;
-        this.boundary = boundary;
+//        this.boundary = boundary;
+
+        this.boundary = Constants.convertBoundryToCoordSystem(boundary, Transit.ACCEPT_COORD_SYSTEM);
 
         transits = new ArrayList<Transit>();
         transitStations = new HashMap<String, TransitStation>();
@@ -59,10 +66,10 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
         stations = new HashMap<String, NLNIRailwayStation>();
         lines = new HashMap<String, NLNIRailwayLine>();
         trainMode = new HashSet<String>();
-        trainMode.add(TransportMode.pt);
+        trainMode.add("train");
         trainAndCarMode = new HashSet<String>();
         trainAndCarMode.add(TransportMode.car);
-        trainAndCarMode.add(TransportMode.pt);
+        trainAndCarMode.add("train");
         setValidating(false);
 
         logger.info("Starting to load lines and stations from " + inputFile);
@@ -180,7 +187,7 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
             Transit transit = new Transit(Transit.TRAIN, line.getName());
             transit.setDuplexTransit(true);
             // Assume the train can run at a speed of 270 km/h
-            transit.setSpeed(270);
+            transit.setSpeed(TRAIN_SPEED);
 
             // create nodes and add them to the network
             // create stations
@@ -218,7 +225,7 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
                 Transit kickedOut = new Transit(Transit.TRAIN, transit.getName() + "_" + index++);
                 kickedOut.setDuplexTransit(true);
                 // Assume the train can run at a speed of 270 km/h
-                kickedOut.setSpeed(270);
+                kickedOut.setSpeed(TRAIN_SPEED);
                 kickedOut.getStops().addAll(stopsBeingKickedOut);
 
                 stopsBeingKickedOut = kickedOut.neoRearrangeStops();
@@ -245,9 +252,9 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
             if (lastStation != null) {
 
                 double distance = lastStation.getDistanceFrom(transitStation);
-                if (distance > Constants.WGS_DISTANCE_1KM * longDistanceFactor) {
+                if (distance > Constants.WGS_DISTANCE_1KM * LONG_DISTANCE_FACTOR) {
                     logger.warn(String.format("Found a super long distance (>%dKM) %.2fKM " +
-                            "in line %s between stations %s -> %s", longDistanceFactor,
+                            "in line %s between stations %s -> %s", LONG_DISTANCE_FACTOR,
                             distance / Constants.WGS_DISTANCE_1KM, transit.getName(), lastStation.getName(),
                             transitStation.getName()));
                     allowedMode = trainAndCarMode;
@@ -266,8 +273,30 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
                     network.addLink(link1);
                     network.addLink(link2);
                 }
+            } else {
+                // This is the first stop of this Transit
+                // It seems we have to give a link that goes from the node of the first stop
+                // to the node of the first stop (the same node) to make the simulation work
+                Link linkToSelf = network.getFactory().createLink(
+                        new IdImpl(getNextId()), stop.getStation().getNode(), stop.getStation().getNode()
+                );
+                linkToSelf.setAllowedModes(allowedMode);
+                synchronized (AbstractNLNITransitAdapter.class) {
+                    network.addLink(linkToSelf);
+                }
             }
             lastStation = transitStation;
+        }
+        assert lastStation != null;
+        // This is the last stop of this Transit
+        // It seems we have to give a link that goes from the node of the last stop
+        // to the node of the last stop (the same node) to make the simulation work
+        Link linkToSelf = network.getFactory().createLink(
+                new IdImpl(getNextId()), lastStation.getNode(), lastStation.getNode()
+        );
+        linkToSelf.setAllowedModes(trainMode);
+        synchronized (AbstractNLNITransitAdapter.class) {
+            network.addLink(linkToSelf);
         }
     }
 
@@ -292,8 +321,7 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
             String refId = atts.getValue("xlink:href").substring(1);
             NLNICurve ref = curves.get(refId);
             // The x and y are actually reversed for longitude and latitude
-            currentStation.setX(ref.getYCenter());
-            currentStation.setY(ref.getXCenter());
+            currentStation.setCoord(transformation.transform(new CoordImpl(ref.getYCenter(), ref.getXCenter())));
         }
     }
 

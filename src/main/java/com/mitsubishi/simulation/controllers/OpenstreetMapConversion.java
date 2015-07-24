@@ -41,9 +41,9 @@ public class OpenstreetMapConversion {
         Osmosis.run(wayExtractorArgs);
 
         Network network = NetworkUtils.convertOSMToNetwork(
-                wayTempOutputPath, TransformationFactory.WGS84, targetCoordSys, true);
+                wayTempOutputPath, TransformationFactory.WGS84, targetCoordSys);
 
-        NetworkUtils.writeNetworkToFile(network, args[1]);
+        NetworkUtils.writeNetworkToFile(network, outputPath);
 
         File wayTempFile = new File(wayTempOutputPath);
         if (wayTempFile.exists()) {
