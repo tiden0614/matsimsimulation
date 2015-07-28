@@ -742,7 +742,7 @@
           <content>
             <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="55.0" prefWidth="384.0">
               <children>
-                <TextField fx:id="OutputDirectory" layoutX="108.0" layoutY="14.0" prefWidth="200.0" />
+                <TextField fx:id="outputDirectory" layoutX="108.0" layoutY="14.0" prefWidth="200.0" />
                 <Button layoutX="324.0" layoutY="15.0" mnemonicParsing="false" text="File..." onAction="#onOutputDirectoryButtonAction"/>
               </children>
             </AnchorPane>
@@ -755,7 +755,7 @@
                 <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" fx:id="x8" />
               </FlowPane.margin>
             </Button>
-            <Button mnemonicParsing="false" text="Start Simulation" FlowPane.margin="$x3" />
+            <Button mnemonicParsing="false" text="Start Simulation" FlowPane.margin="$x3" onAction="#onStartSimulationButtonAction"/>
           </children>
         </FlowPane>
       </children>

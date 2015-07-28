@@ -11,10 +11,8 @@ import com.mitsubishi.simulation.input.transit.TransitAdapter;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.*;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import org.matsim.api.core.v01.Scenario;
@@ -25,6 +23,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.config.MatsimConfigReader;
+import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
@@ -32,6 +31,7 @@ import org.openstreetmap.osmosis.core.Osmosis;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -60,12 +60,11 @@ public class Controller implements Initializable {
     public ChoiceBox populationGenerationLeaveWorkStartMinute;
     public ChoiceBox populationGenerationLeaveWorkEndHour;
     public ChoiceBox populationGenerationLeaveWorkEndMinute;
-    public TextField OutputDirectory;
+    public TextField outputDirectory;
     public TextField populationGenerationNumberOfAgents;
 
     private FileChooser fileChooser;
-
-    private Scenario scenario;
+    private DirectoryChooser dirChooser;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -76,6 +75,7 @@ public class Controller implements Initializable {
         group.selectToggle(networkDataFilterMainRoads);
         // Init a file chooser
         fileChooser = new FileChooser();
+        dirChooser = new DirectoryChooser();
     }
 
     public void onPublicTransportDataSourceButtonAction(ActionEvent actionEvent) {
@@ -93,20 +93,37 @@ public class Controller implements Initializable {
     }
 
     public void onOutputDirectoryButtonAction(ActionEvent actionEvent) {
-        File outputDir = openFileChooser(actionEvent);
+        File outputDir = openDirChooser(actionEvent);
         if (outputDir != null) {
-            OutputDirectory.setText(outputDir.getAbsolutePath());
+            outputDirectory.setText(outputDir.getAbsolutePath());
         }
     }
 
     public void onGenerateMATSIMInputButtonAction(ActionEvent actionEvent) {
-        if (!"".equals(OutputDirectory.getText())) {
-            File outputDir = new File(OutputDirectory.getText());
+        if (!"".equals(outputDirectory.getText())) {
+            File outputDir = new File(outputDirectory.getText());
             if (!outputDir.exists()) {
                 outputDir.mkdirs();
             }
+            // TODO check the file paths
             generateInputFiles();
         }
+    }
+
+    public void onStartSimulationButtonAction(ActionEvent actionEvent) {
+        String configPath = outputDirectory.getText() + File.separator + "config.xml";
+        File configFile = new File(configPath);
+        if (!configFile.exists()) {
+            // Warn the user to first generate the inputs
+            new Alert(Alert.AlertType.WARNING, "Please generate the inputs first!", ButtonType.OK).showAndWait();
+        } else {
+            new Controler(ConfigUtils.loadConfig(configPath)).run();
+        }
+    }
+
+    private File openDirChooser(ActionEvent e) {
+        Window window = ((Node) e.getSource()).getScene().getWindow();
+        return dirChooser.showDialog(window);
     }
 
     private File openFileChooser(ActionEvent e) {
@@ -119,7 +136,7 @@ public class Controller implements Initializable {
         String publicPTSource = publicTransportationDataSource.getText();
         String networkSourceType = networkDataSourceType.getValue().toString();
         String networkSource = networkDataSource.getText();
-        String outputDir = OutputDirectory.getText();
+        String outputDir = outputDirectory.getText();
 
         // config
         Config config = ConfigUtils.createConfig();
@@ -134,7 +151,7 @@ public class Controller implements Initializable {
         new ConfigWriter(config).write(outputDir + File.separator + "config.xml");
 
         // create a scenario
-        scenario = ScenarioUtils.createScenario(config);
+        Scenario scenario = ScenarioUtils.createScenario(config);
 
         // convert the network
         // TODO there might be other network data sources
@@ -169,13 +186,18 @@ public class Controller implements Initializable {
         } else {
             transitAdapter = new OSMRelationTransitAdapter(publicPTSource, scenario.getNetwork());
         }
+
+        // write the transit schedule file and the transit vehicle file
+        // TODO set the parameters according to the inputs of the user
         TransitWriter transitWriter = new TransitWriter(outputDir, transitAdapter.getTransits());
         transitWriter.writeTransitSchedule();
         transitWriter.writeTransitVehicles();
 
+        // write the network
         new NetworkWriter(scenario.getNetwork()).write(outputDir + File.separator + "network.xml");
 
         // generate the population
+        // TODO set the times according to the inputs of the user
         PersonGenerator generator = new RandomWithinBoundaryPersonGenerator(scenario, boundary,
                 Integer.valueOf(populationGenerationNumberOfAgents.getText()));
 
@@ -183,8 +205,8 @@ public class Controller implements Initializable {
             scenario.getPopulation().addPerson(person);
         }
 
+        // write the population
         new PopulationWriter(scenario.getPopulation(), scenario.getNetwork())
                 .write(outputDir + File.separator + "population.xml");
     }
-
 }
