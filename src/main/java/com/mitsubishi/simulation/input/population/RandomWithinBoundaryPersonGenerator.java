@@ -53,7 +53,7 @@ public class RandomWithinBoundaryPersonGenerator implements PersonGenerator {
 //        this.boundary = boundary;
         this.boundary = Constants.convertBoundryToCoordSystem(boundary, Transit.ACCEPT_COORD_SYSTEM);
         this.numPersons = numPersons;
-        this.persons = new ArrayList<Person>();
+        this.persons = new ArrayList<>();
         this.rand = new Random();
         generate();
     }
@@ -103,7 +103,7 @@ public class RandomWithinBoundaryPersonGenerator implements PersonGenerator {
 
     private Coord generateDestCoord(Coord homeLocation) {
         int size = (int) Math.ceil(360.0 / angleSearchInterval);
-        List<Double> shuffledAngleArray = new ArrayList<Double>();
+        List<Double> shuffledAngleArray = new ArrayList<>();
         double realInterval = angleSearchInterval * Math.PI / 180;
         double curAngle = realInterval;
         for (int i = 0; i < size; i++) {
@@ -146,14 +146,5 @@ public class RandomWithinBoundaryPersonGenerator implements PersonGenerator {
 
     public Scenario getScenario() {
         return scenario;
-    }
-
-    public static void main(String[] args) {
-        Config config = ConfigUtils.createConfig();
-        Scenario scenary = ScenarioUtils.createScenario(config);
-        RandomWithinBoundaryPersonGenerator gen = new RandomWithinBoundaryPersonGenerator(
-                scenary, new QuadTree.Rect(139.6864, 35.7405, 139.8450, 35.6210), 10
-        );
-        List<Person> persons = gen.getPersons();
     }
 }

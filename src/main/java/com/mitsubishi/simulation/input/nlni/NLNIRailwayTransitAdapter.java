@@ -9,7 +9,6 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.basic.v01.IdImpl;
-import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.NodeImpl;
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.geometry.CoordImpl;
@@ -60,14 +59,14 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
 
         this.boundary = Constants.convertBoundryToCoordSystem(boundary, Transit.ACCEPT_COORD_SYSTEM);
 
-        transits = new ArrayList<Transit>();
-        transitStations = new HashMap<String, TransitStation>();
-        curves = new HashMap<String, NLNICurve>();
-        stations = new HashMap<String, NLNIRailwayStation>();
-        lines = new HashMap<String, NLNIRailwayLine>();
-        trainMode = new HashSet<String>();
+        transits = new ArrayList<>();
+        transitStations = new HashMap<>();
+        curves = new HashMap<>();
+        stations = new HashMap<>();
+        lines = new HashMap<>();
+        trainMode = new HashSet<>();
         trainMode.add("train");
-        trainAndCarMode = new HashSet<String>();
+        trainAndCarMode = new HashSet<>();
         trainAndCarMode.add(TransportMode.car);
         trainAndCarMode.add("train");
         setValidating(false);
@@ -100,7 +99,7 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
     }
 
     public List<TransitStation> getTransitStations() {
-        List<TransitStation> retList = new ArrayList<TransitStation>();
+        List<TransitStation> retList = new ArrayList<>();
         retList.addAll(transitStations.values());
         return retList;
     }
@@ -141,10 +140,10 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
         // Split those lines who has more than one type of stations
         // Create a new line for each corresponding type of stations
         Iterator<Map.Entry<String, NLNIRailwayLine>> lineIter = lines.entrySet().iterator();
-        Map<String, NLNIRailwayLine> toBeAdded = new HashMap<String, NLNIRailwayLine>();
+        Map<String, NLNIRailwayLine> toBeAdded = new HashMap<>();
         while (lineIter.hasNext()) {
             Map.Entry<String, NLNIRailwayLine> entry = lineIter.next();
-            Map<String, List<NLNIRailwayStation>> stationCategories = new HashMap<String, List<NLNIRailwayStation>>();
+            Map<String, List<NLNIRailwayStation>> stationCategories = new HashMap<>();
             NLNIRailwayLine l = entry.getValue();
             for (Iterator<NLNIRailwayStation> sIter = l.getStations().iterator(); sIter.hasNext();) {
                 NLNIRailwayStation station = sIter.next();
@@ -156,7 +155,7 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
                 String stationType = station.getRailwayType();
                 List<NLNIRailwayStation> slist = stationCategories.get(stationType);
                 if (slist == null) {
-                    slist = new LinkedList<NLNIRailwayStation>();
+                    slist = new LinkedList<>();
                     stationCategories.put(stationType, slist);
                 }
                 slist.add(station);
@@ -236,9 +235,7 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
             }
         }
 
-        for (Transit transit : transits) {
-            buildLinks(transit);
-        }
+        transits.forEach(this::buildLinks);
 
     }
 
@@ -306,15 +303,6 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
             currentCurve = new NLNICurve(atts.getValue("gml:id"));
         } else if ("Station".equals(name)) {
             String id = atts.getValue("gml:id");
-
-            // for debug use
-//            int last4Digitsigits = Integer.valueOf(id.split("_")[1]);
-//            if (last4Digits < 7189 || last4Digits > 7259) {
-//                currentStation = null;
-//                return;
-//            }
-
-
             currentStation = new NLNIRailwayStation(id);
         } else if ("location".equals(name) && "Station".equals(context.peek())) {
             if (currentStation == null) return;
@@ -357,12 +345,5 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
         } else if ("Station".equals(name) && "Dataset".equals(context.peek())) {
             stations.put(currentStation.getId(), currentStation);
         }
-    }
-
-    public static void main(String[] args) {
-        Network network = NetworkUtils.createNetwork();
-        NLNIRailwayTransitAdapter adapter = new NLNIRailwayTransitAdapter("NLNIInput/N02-13.xml", network);
-        System.out.println(adapter.curves.size());
-        com.mitsubishi.simulation.input.network.NetworkUtils.writeNetworkToFile(network, "NLNIInput/n.xml");
     }
 }

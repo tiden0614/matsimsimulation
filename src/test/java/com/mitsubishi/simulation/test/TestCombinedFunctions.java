@@ -49,15 +49,13 @@ public class TestCombinedFunctions {
         };
         Osmosis.run(wayExtractorArgs);
 
-        Network network = NetworkUtils.convertOSMToNetwork(
+        return NetworkUtils.convertOSMToNetwork(
                 scenario.getNetwork(),
                 COMBINED_TEST_OUTPUT + File.separator + "wayTempOutput.osm",
                 TransformationFactory.WGS84,
                 TransformationFactory.CH1903_LV03,
                 true
         );
-
-        return network;
     }
 
     public Network getNewNetwork() {
@@ -66,10 +64,11 @@ public class TestCombinedFunctions {
 
     @Test
     public void testCombinedFunction() {
-//        Network someNetwork = getTransformedNetwork();
-        Network someNetwork = scenario.getNetwork();
+        Network someNetwork = getTransformedNetwork();
+//        Network someNetwork = scenario.getNetwork();
 
-        QuadTree.Rect boundary = new OSMBoundingBoxParser(COMBINED_TEST_INPUT + File.separator + "tokyo.osm").getBoundingBox();
+        QuadTree.Rect boundary = new OSMBoundingBoxParser(COMBINED_TEST_INPUT + File.separator + "tokyo.osm")
+                .getBoundingBox();
 
         // insert public transportation network
         NLNIRailwayTransitAdapter adapter = new NLNIRailwayTransitAdapter(

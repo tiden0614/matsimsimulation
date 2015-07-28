@@ -1,0 +1,764 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.collections.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.lang.*?>
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="557.0" prefWidth="388.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="com.mitsubishi.simulation.gui.Controller">
+  <children>
+    <FlowPane minHeight="557.0" minWidth="387.0" prefHeight="557.0" prefWidth="388.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <children>
+        <TitledPane animated="false" collapsible="false" expanded="true" minWidth="385.0" prefHeight="160.0" prefWidth="388.0" text="Public Transport Data" textOverrun="ELLIPSIS" underline="false">
+          <content>
+            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="134.0" prefWidth="388.0">
+              <children>
+                <ChoiceBox fx:id="publicTransportationDataSourceType" layoutX="14.0" layoutY="14.0" prefWidth="66.0" visible="true" value="NLNI">
+                  <items>
+                    <FXCollections fx:factory="observableArrayList">
+                      <String fx:value="NLNI" />
+                      <String fx:value="OSM" />
+                    </FXCollections>
+                  </items>
+                </ChoiceBox>
+                <TextField fx:id="publicTransportationDataSource" layoutX="107.0" layoutY="13.0" prefWidth="200.0" />
+                <Button layoutX="322.0" layoutY="13.0" mnemonicParsing="false" text="File..." onAction="#onPublicTransportDataSourceButtonAction"/>
+                <FlowPane layoutX="14.0" layoutY="45.0" minHeight="22.0" prefHeight="41.0" prefWidth="321.0">
+                  <children>
+                    <Label text="Time Range">
+                      <FlowPane.margin>
+                        <Insets right="60.0" />
+                      </FlowPane.margin>
+                    </Label>
+                    <FlowPane prefHeight="23.000099999997474" prefWidth="82.0">
+                      <children>
+                        <ChoiceBox fx:id="publicTransportationStartHour" minHeight="16.0" minWidth="20.0" prefHeight="21.0" prefWidth="33.0" value="05">
+                          <items>
+                            <FXCollections fx:factory="observableArrayList">
+                              <String fx:value="00" />
+                              <String fx:value="01" />
+                              <String fx:value="02" />
+                              <String fx:value="03" />
+                              <String fx:value="04" />
+                              <String fx:value="05" />
+                              <String fx:value="06" />
+                              <String fx:value="07" />
+                              <String fx:value="08" />
+                              <String fx:value="09" />
+                              <String fx:value="10" />
+                              <String fx:value="11" />
+                              <String fx:value="12" />
+                              <String fx:value="13" />
+                              <String fx:value="14" />
+                              <String fx:value="15" />
+                              <String fx:value="16" />
+                              <String fx:value="17" />
+                              <String fx:value="18" />
+                              <String fx:value="19" />
+                              <String fx:value="20" />
+                              <String fx:value="21" />
+                              <String fx:value="22" />
+                              <String fx:value="23" />
+                            </FXCollections>
+                          </items>
+                        </ChoiceBox>
+                        <Label prefWidth="-1.0" text=":" textAlignment="CENTER">
+                          <FlowPane.margin>
+                            <Insets left="5.0" right="5.0" fx:id="x6" />
+                          </FlowPane.margin>
+                        </Label>
+                        <ChoiceBox fx:id="publicTransportationStartMinute" minHeight="16.0" minWidth="20.0" prefHeight="21.0" prefWidth="33.0" value="00">
+                          <items>
+                            <FXCollections fx:factory="observableArrayList">
+                              <String fx:value="00" />
+                              <String fx:value="01" />
+                              <String fx:value="02" />
+                              <String fx:value="03" />
+                              <String fx:value="04" />
+                              <String fx:value="05" />
+                              <String fx:value="06" />
+                              <String fx:value="07" />
+                              <String fx:value="08" />
+                              <String fx:value="09" />
+                              <String fx:value="10" />
+                              <String fx:value="11" />
+                              <String fx:value="12" />
+                              <String fx:value="13" />
+                              <String fx:value="14" />
+                              <String fx:value="15" />
+                              <String fx:value="16" />
+                              <String fx:value="17" />
+                              <String fx:value="18" />
+                              <String fx:value="19" />
+                              <String fx:value="20" />
+                              <String fx:value="21" />
+                              <String fx:value="22" />
+                              <String fx:value="23" />
+                              <String fx:value="24" />
+                              <String fx:value="25" />
+                              <String fx:value="26" />
+                              <String fx:value="27" />
+                              <String fx:value="28" />
+                              <String fx:value="29" />
+                              <String fx:value="20" />
+                              <String fx:value="31" />
+                              <String fx:value="32" />
+                              <String fx:value="33" />
+                              <String fx:value="34" />
+                              <String fx:value="35" />
+                              <String fx:value="36" />
+                              <String fx:value="37" />
+                              <String fx:value="38" />
+                              <String fx:value="39" />
+                              <String fx:value="40" />
+                              <String fx:value="41" />
+                              <String fx:value="42" />
+                              <String fx:value="43" />
+                              <String fx:value="44" />
+                              <String fx:value="45" />
+                              <String fx:value="46" />
+                              <String fx:value="47" />
+                              <String fx:value="48" />
+                              <String fx:value="49" />
+                              <String fx:value="50" />
+                              <String fx:value="51" />
+                              <String fx:value="52" />
+                              <String fx:value="53" />
+                              <String fx:value="54" />
+                              <String fx:value="55" />
+                              <String fx:value="56" />
+                              <String fx:value="57" />
+                              <String fx:value="58" />
+                              <String fx:value="59" />
+                            </FXCollections>
+                          </items>
+                        </ChoiceBox>
+                      </children>
+                    </FlowPane>
+                    <Label text="~" />
+                    <FlowPane prefHeight="22.000099999997474" prefWidth="82.0">
+                      <children>
+                        <ChoiceBox fx:id="publicTransportationEndHour" minHeight="16.0" minWidth="20.0" prefHeight="21.0" prefWidth="33.0" value="21">
+                          <items>
+                            <FXCollections fx:factory="observableArrayList">
+                              <String fx:value="00" />
+                              <String fx:value="01" />
+                              <String fx:value="02" />
+                              <String fx:value="03" />
+                              <String fx:value="04" />
+                              <String fx:value="05" />
+                              <String fx:value="06" />
+                              <String fx:value="07" />
+                              <String fx:value="08" />
+                              <String fx:value="09" />
+                              <String fx:value="10" />
+                              <String fx:value="11" />
+                              <String fx:value="12" />
+                              <String fx:value="13" />
+                              <String fx:value="14" />
+                              <String fx:value="15" />
+                              <String fx:value="16" />
+                              <String fx:value="17" />
+                              <String fx:value="18" />
+                              <String fx:value="19" />
+                              <String fx:value="20" />
+                              <String fx:value="21" />
+                              <String fx:value="22" />
+                              <String fx:value="23" />
+                            </FXCollections>
+                          </items>
+                        </ChoiceBox>
+                        <Label prefWidth="-1.0" text=":" textAlignment="CENTER" FlowPane.margin="$x2" />
+                        <ChoiceBox fx:id="publicTransportationEndMinute" minHeight="16.0" minWidth="20.0" prefHeight="21.0" prefWidth="33.0" value="00">
+                          <items>
+                            <FXCollections fx:factory="observableArrayList">
+                              <String fx:value="00" />
+                              <String fx:value="01" />
+                              <String fx:value="02" />
+                              <String fx:value="03" />
+                              <String fx:value="04" />
+                              <String fx:value="05" />
+                              <String fx:value="06" />
+                              <String fx:value="07" />
+                              <String fx:value="08" />
+                              <String fx:value="09" />
+                              <String fx:value="10" />
+                              <String fx:value="11" />
+                              <String fx:value="12" />
+                              <String fx:value="13" />
+                              <String fx:value="14" />
+                              <String fx:value="15" />
+                              <String fx:value="16" />
+                              <String fx:value="17" />
+                              <String fx:value="18" />
+                              <String fx:value="19" />
+                              <String fx:value="20" />
+                              <String fx:value="21" />
+                              <String fx:value="22" />
+                              <String fx:value="23" />
+                              <String fx:value="24" />
+                              <String fx:value="25" />
+                              <String fx:value="26" />
+                              <String fx:value="27" />
+                              <String fx:value="28" />
+                              <String fx:value="29" />
+                              <String fx:value="20" />
+                              <String fx:value="31" />
+                              <String fx:value="32" />
+                              <String fx:value="33" />
+                              <String fx:value="34" />
+                              <String fx:value="35" />
+                              <String fx:value="36" />
+                              <String fx:value="37" />
+                              <String fx:value="38" />
+                              <String fx:value="39" />
+                              <String fx:value="40" />
+                              <String fx:value="41" />
+                              <String fx:value="42" />
+                              <String fx:value="43" />
+                              <String fx:value="44" />
+                              <String fx:value="45" />
+                              <String fx:value="46" />
+                              <String fx:value="47" />
+                              <String fx:value="48" />
+                              <String fx:value="49" />
+                              <String fx:value="50" />
+                              <String fx:value="51" />
+                              <String fx:value="52" />
+                              <String fx:value="53" />
+                              <String fx:value="54" />
+                              <String fx:value="55" />
+                              <String fx:value="56" />
+                              <String fx:value="57" />
+                              <String fx:value="58" />
+                              <String fx:value="59" />
+                            </FXCollections>
+                          </items>
+                        </ChoiceBox>
+                      </children>
+                    </FlowPane>
+                  </children>
+                </FlowPane>
+                <FlowPane layoutX="15.0" layoutY="79.0" prefHeight="41.0" prefWidth="280.0">
+                  <children>
+                    <Label text="Emit Interval (mins)">
+                      <FlowPane.margin>
+                        <Insets right="20.0" fx:id="x2" />
+                      </FlowPane.margin>
+                    </Label>
+                    <TextField fx:id="publicTransportationEmitInterval" alignment="CENTER_RIGHT" prefHeight="16.0" prefWidth="54.0" text="15" />
+                  </children>
+                </FlowPane>
+                <FlowPane layoutX="15.0" layoutY="105.0" prefHeight="41.0" prefWidth="280.0">
+                  <children>
+                    <Label text="Speed (km/h)">
+                      <FlowPane.margin>
+                        <Insets right="51.0" />
+                      </FlowPane.margin>
+                    </Label>
+                    <TextField fx:id="publicTransportationSpeed" alignment="CENTER_RIGHT" prefHeight="16.0" prefWidth="54.0" text="120" />
+                  </children>
+                </FlowPane>
+              </children>
+            </AnchorPane>
+          </content>
+        </TitledPane>
+        <TitledPane animated="false" collapsible="false" minWidth="384.0" prefHeight="113.0" prefWidth="388.0" text="Network Data">
+          <content>
+            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="87.0" prefWidth="475.0">
+              <children>
+                <ChoiceBox fx:id="networkDataSourceType" layoutX="14.0" layoutY="14.0" value="OSM">
+                  <items>
+                    <FXCollections fx:factory="observableArrayList">
+                      <String fx:value="OSM" />
+                    </FXCollections>
+                  </items>
+                </ChoiceBox>
+                <TextField fx:id="networkDataSource" layoutX="107.0" layoutY="13.0" prefWidth="200.0" />
+                <Button layoutX="323.0" layoutY="14.0" mnemonicParsing="false" text="File..." onAction="#onNetworkDataSourceButtonAction"/>
+                <FlowPane layoutX="14.0" layoutY="52.0" prefHeight="32.0" prefWidth="388.0">
+                  <children>
+                    <Label text="Road Type" FlowPane.margin="$x2" />
+                    <RadioButton fx:id="networkDataFilterAllRoads" mnemonicParsing="false" text="All" FlowPane.margin="$x2" />
+                    <RadioButton fx:id="networkDataFilterMainRoads" mnemonicParsing="false" text="Main Roads" />
+                  </children>
+                </FlowPane>
+                <FlowPane layoutX="0.0" layoutY="-86.0" prefHeight="32.0" prefWidth="200.0" />
+              </children>
+            </AnchorPane>
+          </content>
+        </TitledPane>
+        <TitledPane animated="false" collapsible="false" minWidth="384.0" prefHeight="143.0" prefWidth="388.0" text="Population Generation">
+          <content>
+            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="49.0" prefWidth="475.0">
+              <children>
+                <Label layoutX="14.0" layoutY="79.0" text="Number of agents" />
+                <TextField fx:id="populationGenerationNumberOfAgents" alignment="CENTER_RIGHT" layoutX="121.0" layoutY="79.0" prefHeight="16.0" prefWidth="59.0" text="10000" />
+                <FlowPane layoutX="15.0" layoutY="17.0" minHeight="22.0" prefHeight="22.000099999997474" prefWidth="368.0">
+                  <children>
+                    <Label text="Leave Home">
+                      <FlowPane.margin>
+                        <Insets right="40.0" />
+                      </FlowPane.margin>
+                    </Label>
+                    <FlowPane prefHeight="22.000099999997474" prefWidth="82.0">
+                      <children>
+                        <ChoiceBox fx:id="populationGenerationLeaveHomeStartHour" minHeight="16.0" minWidth="20.0" prefHeight="21.0" prefWidth="33.0" value="05">
+                          <items>
+                            <FXCollections fx:factory="observableArrayList">
+                              <String fx:value="00" />
+                              <String fx:value="01" />
+                              <String fx:value="02" />
+                              <String fx:value="03" />
+                              <String fx:value="04" />
+                              <String fx:value="05" />
+                              <String fx:value="06" />
+                              <String fx:value="07" />
+                              <String fx:value="08" />
+                              <String fx:value="09" />
+                              <String fx:value="10" />
+                              <String fx:value="11" />
+                              <String fx:value="12" />
+                              <String fx:value="13" />
+                              <String fx:value="14" />
+                              <String fx:value="15" />
+                              <String fx:value="16" />
+                              <String fx:value="17" />
+                              <String fx:value="18" />
+                              <String fx:value="19" />
+                              <String fx:value="20" />
+                              <String fx:value="21" />
+                              <String fx:value="22" />
+                              <String fx:value="23" />
+                            </FXCollections>
+                          </items>
+                        </ChoiceBox>
+                        <Label prefWidth="-1.0" text=":" textAlignment="CENTER">
+                          <FlowPane.margin>
+                            <Insets left="5.0" right="5.0" fx:id="x3" />
+                          </FlowPane.margin>
+                        </Label>
+                        <ChoiceBox fx:id="populationGenerationLeaveHomeStartMinute" minHeight="16.0" minWidth="20.0" prefHeight="21.0" prefWidth="33.0" value="00">
+                          <items>
+                            <FXCollections fx:factory="observableArrayList">
+                              <String fx:value="00" />
+                              <String fx:value="01" />
+                              <String fx:value="02" />
+                              <String fx:value="03" />
+                              <String fx:value="04" />
+                              <String fx:value="05" />
+                              <String fx:value="06" />
+                              <String fx:value="07" />
+                              <String fx:value="08" />
+                              <String fx:value="09" />
+                              <String fx:value="10" />
+                              <String fx:value="11" />
+                              <String fx:value="12" />
+                              <String fx:value="13" />
+                              <String fx:value="14" />
+                              <String fx:value="15" />
+                              <String fx:value="16" />
+                              <String fx:value="17" />
+                              <String fx:value="18" />
+                              <String fx:value="19" />
+                              <String fx:value="20" />
+                              <String fx:value="21" />
+                              <String fx:value="22" />
+                              <String fx:value="23" />
+                              <String fx:value="24" />
+                              <String fx:value="25" />
+                              <String fx:value="26" />
+                              <String fx:value="27" />
+                              <String fx:value="28" />
+                              <String fx:value="29" />
+                              <String fx:value="20" />
+                              <String fx:value="31" />
+                              <String fx:value="32" />
+                              <String fx:value="33" />
+                              <String fx:value="34" />
+                              <String fx:value="35" />
+                              <String fx:value="36" />
+                              <String fx:value="37" />
+                              <String fx:value="38" />
+                              <String fx:value="39" />
+                              <String fx:value="40" />
+                              <String fx:value="41" />
+                              <String fx:value="42" />
+                              <String fx:value="43" />
+                              <String fx:value="44" />
+                              <String fx:value="45" />
+                              <String fx:value="46" />
+                              <String fx:value="47" />
+                              <String fx:value="48" />
+                              <String fx:value="49" />
+                              <String fx:value="50" />
+                              <String fx:value="51" />
+                              <String fx:value="52" />
+                              <String fx:value="53" />
+                              <String fx:value="54" />
+                              <String fx:value="55" />
+                              <String fx:value="56" />
+                              <String fx:value="57" />
+                              <String fx:value="58" />
+                              <String fx:value="59" />
+                            </FXCollections>
+                          </items>
+                        </ChoiceBox>
+                      </children>
+                    </FlowPane>
+                    <Label text="~" />
+                    <FlowPane prefHeight="23.000099999997474" prefWidth="82.0">
+                      <children>
+                        <ChoiceBox fx:id="populationGenerationLeaveHomeEndHour" minHeight="16.0" minWidth="20.0" prefHeight="21.0" prefWidth="33.0" value="11">
+                          <items>
+                            <FXCollections fx:factory="observableArrayList">
+                              <String fx:value="00" />
+                              <String fx:value="01" />
+                              <String fx:value="02" />
+                              <String fx:value="03" />
+                              <String fx:value="04" />
+                              <String fx:value="05" />
+                              <String fx:value="06" />
+                              <String fx:value="07" />
+                              <String fx:value="08" />
+                              <String fx:value="09" />
+                              <String fx:value="10" />
+                              <String fx:value="11" />
+                              <String fx:value="12" />
+                              <String fx:value="13" />
+                              <String fx:value="14" />
+                              <String fx:value="15" />
+                              <String fx:value="16" />
+                              <String fx:value="17" />
+                              <String fx:value="18" />
+                              <String fx:value="19" />
+                              <String fx:value="20" />
+                              <String fx:value="21" />
+                              <String fx:value="22" />
+                              <String fx:value="23" />
+                            </FXCollections>
+                          </items>
+                        </ChoiceBox>
+                        <Label prefWidth="-1.0" text=":" textAlignment="CENTER">
+                          <FlowPane.margin>
+                            <Insets left="5.0" right="5.0" fx:id="x4" />
+                          </FlowPane.margin>
+                        </Label>
+                        <ChoiceBox fx:id="populationGenerationLeaveHomeEndMinute" minHeight="16.0" minWidth="20.0" prefHeight="21.0" prefWidth="33.0" value="30">
+                          <items>
+                            <FXCollections fx:factory="observableArrayList">
+                              <String fx:value="00" />
+                              <String fx:value="01" />
+                              <String fx:value="02" />
+                              <String fx:value="03" />
+                              <String fx:value="04" />
+                              <String fx:value="05" />
+                              <String fx:value="06" />
+                              <String fx:value="07" />
+                              <String fx:value="08" />
+                              <String fx:value="09" />
+                              <String fx:value="10" />
+                              <String fx:value="11" />
+                              <String fx:value="12" />
+                              <String fx:value="13" />
+                              <String fx:value="14" />
+                              <String fx:value="15" />
+                              <String fx:value="16" />
+                              <String fx:value="17" />
+                              <String fx:value="18" />
+                              <String fx:value="19" />
+                              <String fx:value="20" />
+                              <String fx:value="21" />
+                              <String fx:value="22" />
+                              <String fx:value="23" />
+                              <String fx:value="24" />
+                              <String fx:value="25" />
+                              <String fx:value="26" />
+                              <String fx:value="27" />
+                              <String fx:value="28" />
+                              <String fx:value="29" />
+                              <String fx:value="30" />
+                              <String fx:value="31" />
+                              <String fx:value="32" />
+                              <String fx:value="33" />
+                              <String fx:value="34" />
+                              <String fx:value="35" />
+                              <String fx:value="36" />
+                              <String fx:value="37" />
+                              <String fx:value="38" />
+                              <String fx:value="39" />
+                              <String fx:value="40" />
+                              <String fx:value="41" />
+                              <String fx:value="42" />
+                              <String fx:value="43" />
+                              <String fx:value="44" />
+                              <String fx:value="45" />
+                              <String fx:value="46" />
+                              <String fx:value="47" />
+                              <String fx:value="48" />
+                              <String fx:value="49" />
+                              <String fx:value="50" />
+                              <String fx:value="51" />
+                              <String fx:value="52" />
+                              <String fx:value="53" />
+                              <String fx:value="54" />
+                              <String fx:value="55" />
+                              <String fx:value="56" />
+                              <String fx:value="57" />
+                              <String fx:value="58" />
+                              <String fx:value="59" />
+                            </FXCollections>
+                          </items>
+                        </ChoiceBox>
+                      </children>
+                    </FlowPane>
+                  </children>
+                </FlowPane>
+                <FlowPane layoutX="15.0" layoutY="47.0" minHeight="22.0" prefHeight="32.0" prefWidth="384.0">
+                  <children>
+                    <Label text="Leave Work">
+                      <FlowPane.margin>
+                        <Insets right="44.0" />
+                      </FlowPane.margin>
+                    </Label>
+                    <FlowPane prefHeight="22.000099999997474" prefWidth="82.0">
+                      <children>
+                        <ChoiceBox fx:id="populationGenerationLeaveWorkStartHour" minHeight="16.0" minWidth="20.0" prefHeight="21.0" prefWidth="33.0" value="16">
+                          <items>
+                            <FXCollections fx:factory="observableArrayList">
+                              <String fx:value="00" />
+                              <String fx:value="01" />
+                              <String fx:value="02" />
+                              <String fx:value="03" />
+                              <String fx:value="04" />
+                              <String fx:value="05" />
+                              <String fx:value="06" />
+                              <String fx:value="07" />
+                              <String fx:value="08" />
+                              <String fx:value="09" />
+                              <String fx:value="10" />
+                              <String fx:value="11" />
+                              <String fx:value="12" />
+                              <String fx:value="13" />
+                              <String fx:value="14" />
+                              <String fx:value="15" />
+                              <String fx:value="16" />
+                              <String fx:value="17" />
+                              <String fx:value="18" />
+                              <String fx:value="19" />
+                              <String fx:value="20" />
+                              <String fx:value="21" />
+                              <String fx:value="22" />
+                              <String fx:value="23" />
+                            </FXCollections>
+                          </items>
+                        </ChoiceBox>
+                        <Label prefWidth="-1.0" text=":" textAlignment="CENTER">
+                          <FlowPane.margin>
+                            <Insets left="5.0" right="5.0" fx:id="x5" />
+                          </FlowPane.margin>
+                        </Label>
+                        <ChoiceBox fx:id="populationGenerationLeaveWorkStartMinute" minHeight="16.0" minWidth="20.0" prefHeight="21.0" prefWidth="33.0" value="00">
+                          <items>
+                            <FXCollections fx:factory="observableArrayList">
+                              <String fx:value="00" />
+                              <String fx:value="01" />
+                              <String fx:value="02" />
+                              <String fx:value="03" />
+                              <String fx:value="04" />
+                              <String fx:value="05" />
+                              <String fx:value="06" />
+                              <String fx:value="07" />
+                              <String fx:value="08" />
+                              <String fx:value="09" />
+                              <String fx:value="10" />
+                              <String fx:value="11" />
+                              <String fx:value="12" />
+                              <String fx:value="13" />
+                              <String fx:value="14" />
+                              <String fx:value="15" />
+                              <String fx:value="16" />
+                              <String fx:value="17" />
+                              <String fx:value="18" />
+                              <String fx:value="19" />
+                              <String fx:value="20" />
+                              <String fx:value="21" />
+                              <String fx:value="22" />
+                              <String fx:value="23" />
+                              <String fx:value="24" />
+                              <String fx:value="25" />
+                              <String fx:value="26" />
+                              <String fx:value="27" />
+                              <String fx:value="28" />
+                              <String fx:value="29" />
+                              <String fx:value="30" />
+                              <String fx:value="31" />
+                              <String fx:value="32" />
+                              <String fx:value="33" />
+                              <String fx:value="34" />
+                              <String fx:value="35" />
+                              <String fx:value="36" />
+                              <String fx:value="37" />
+                              <String fx:value="38" />
+                              <String fx:value="39" />
+                              <String fx:value="40" />
+                              <String fx:value="41" />
+                              <String fx:value="42" />
+                              <String fx:value="43" />
+                              <String fx:value="44" />
+                              <String fx:value="45" />
+                              <String fx:value="46" />
+                              <String fx:value="47" />
+                              <String fx:value="48" />
+                              <String fx:value="49" />
+                              <String fx:value="50" />
+                              <String fx:value="51" />
+                              <String fx:value="52" />
+                              <String fx:value="53" />
+                              <String fx:value="54" />
+                              <String fx:value="55" />
+                              <String fx:value="56" />
+                              <String fx:value="57" />
+                              <String fx:value="58" />
+                              <String fx:value="59" />
+                            </FXCollections>
+                          </items>
+                        </ChoiceBox>
+                      </children>
+                    </FlowPane>
+                    <Label text="~" />
+                    <FlowPane prefHeight="23.000099999997474" prefWidth="82.0">
+                      <children>
+                        <ChoiceBox fx:id="populationGenerationLeaveWorkEndHour" minHeight="16.0" minWidth="20.0" prefHeight="21.0" prefWidth="33.0" value="22">
+                          <items>
+                            <FXCollections fx:factory="observableArrayList">
+                              <String fx:value="00" />
+                              <String fx:value="01" />
+                              <String fx:value="02" />
+                              <String fx:value="03" />
+                              <String fx:value="04" />
+                              <String fx:value="05" />
+                              <String fx:value="06" />
+                              <String fx:value="07" />
+                              <String fx:value="08" />
+                              <String fx:value="09" />
+                              <String fx:value="10" />
+                              <String fx:value="11" />
+                              <String fx:value="12" />
+                              <String fx:value="13" />
+                              <String fx:value="14" />
+                              <String fx:value="15" />
+                              <String fx:value="16" />
+                              <String fx:value="17" />
+                              <String fx:value="18" />
+                              <String fx:value="19" />
+                              <String fx:value="20" />
+                              <String fx:value="21" />
+                              <String fx:value="22" />
+                              <String fx:value="23" />
+                            </FXCollections>
+                          </items>
+                        </ChoiceBox>
+                        <Label prefWidth="-1.0" text=":" textAlignment="CENTER">
+                          <FlowPane.margin>
+                            <Insets left="5.0" right="5.0" fx:id="x9" />
+                          </FlowPane.margin>
+                        </Label>
+                        <ChoiceBox fx:id="populationGenerationLeaveWorkEndMinute" minHeight="16.0" minWidth="20.0" prefHeight="21.0" prefWidth="33.0" value="30">
+                          <items>
+                            <FXCollections fx:factory="observableArrayList">
+                              <String fx:value="00" />
+                              <String fx:value="01" />
+                              <String fx:value="02" />
+                              <String fx:value="03" />
+                              <String fx:value="04" />
+                              <String fx:value="05" />
+                              <String fx:value="06" />
+                              <String fx:value="07" />
+                              <String fx:value="08" />
+                              <String fx:value="09" />
+                              <String fx:value="10" />
+                              <String fx:value="11" />
+                              <String fx:value="12" />
+                              <String fx:value="13" />
+                              <String fx:value="14" />
+                              <String fx:value="15" />
+                              <String fx:value="16" />
+                              <String fx:value="17" />
+                              <String fx:value="18" />
+                              <String fx:value="19" />
+                              <String fx:value="20" />
+                              <String fx:value="21" />
+                              <String fx:value="22" />
+                              <String fx:value="23" />
+                              <String fx:value="24" />
+                              <String fx:value="25" />
+                              <String fx:value="26" />
+                              <String fx:value="27" />
+                              <String fx:value="28" />
+                              <String fx:value="29" />
+                              <String fx:value="30" />
+                              <String fx:value="31" />
+                              <String fx:value="32" />
+                              <String fx:value="33" />
+                              <String fx:value="34" />
+                              <String fx:value="35" />
+                              <String fx:value="36" />
+                              <String fx:value="37" />
+                              <String fx:value="38" />
+                              <String fx:value="39" />
+                              <String fx:value="40" />
+                              <String fx:value="41" />
+                              <String fx:value="42" />
+                              <String fx:value="43" />
+                              <String fx:value="44" />
+                              <String fx:value="45" />
+                              <String fx:value="46" />
+                              <String fx:value="47" />
+                              <String fx:value="48" />
+                              <String fx:value="49" />
+                              <String fx:value="50" />
+                              <String fx:value="51" />
+                              <String fx:value="52" />
+                              <String fx:value="53" />
+                              <String fx:value="54" />
+                              <String fx:value="55" />
+                              <String fx:value="56" />
+                              <String fx:value="57" />
+                              <String fx:value="58" />
+                              <String fx:value="59" />
+                            </FXCollections>
+                          </items>
+                        </ChoiceBox>
+                      </children>
+                    </FlowPane>
+                  </children>
+                </FlowPane>
+              </children>
+            </AnchorPane>
+          </content>
+        </TitledPane>
+        <TitledPane animated="false" prefHeight="77.0" prefWidth="388.0" text="Output" collapsible="false">
+          <content>
+            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="55.0" prefWidth="384.0">
+              <children>
+                <TextField fx:id="OutputDirectory" layoutX="108.0" layoutY="14.0" prefWidth="200.0" />
+                <Button layoutX="324.0" layoutY="15.0" mnemonicParsing="false" text="File..." onAction="#onOutputDirectoryButtonAction"/>
+              </children>
+            </AnchorPane>
+          </content>
+        </TitledPane>
+        <FlowPane alignment="CENTER" columnHalignment="CENTER" orientation="HORIZONTAL" prefHeight="64.0" prefWidth="387.0" rowValignment="CENTER">
+          <children>
+            <Button mnemonicParsing="false" text="Generate MATSIM Input" onAction="#onGenerateMATSIMInputButtonAction">
+              <FlowPane.margin>
+                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" fx:id="x8" />
+              </FlowPane.margin>
+            </Button>
+            <Button mnemonicParsing="false" text="Start Simulation" FlowPane.margin="$x3" />
+          </children>
+        </FlowPane>
+      </children>
+    </FlowPane>
+  </children>
+</AnchorPane>

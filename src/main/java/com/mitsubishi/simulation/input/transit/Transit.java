@@ -2,8 +2,6 @@ package com.mitsubishi.simulation.input.transit;
 
 import com.mitsubishi.simulation.utils.Constants;
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 import java.util.*;
@@ -53,8 +51,8 @@ public class Transit {
         this.duplexTransit = false;
         this.type = type;
         this.name = name;
-        this.stops = new LinkedList<TransitStop>();
-        this.possibleTransferMap = new LinkedHashMap<String, List<Transfer>>();
+        this.stops = new LinkedList<>();
+        this.possibleTransferMap = new LinkedHashMap<>();
         // we give a default speed to this transit by 60 km/h
         this.speed = 60;
         this.lineDistance = 0;
@@ -102,7 +100,7 @@ public class Transit {
      * @return possible transfers
      */
     public List<Transfer> computeForwardPossibleTransfers(TransitStation currentStation) {
-        List<Transfer> transfers = new ArrayList<Transfer>();
+        List<Transfer> transfers = new ArrayList<>();
         int stopIndex;
         for (stopIndex = 0;
              stopIndex < stops.size() && stops.get(stopIndex).getStation() != currentStation; stopIndex++) ;
@@ -130,6 +128,10 @@ public class Transit {
     }
 
     /**
+     * =============================================================================
+     * |                 DEPRECATED; USE neoRearrangeStops INSTEAD                 |
+     * =============================================================================
+     *
      * Since the order of stops loaded from some data source is incorrect, it needs to rearrange the stops
      *
      * The algorithm computes relative distances between stops and finds a most possible path connecting
@@ -263,8 +265,8 @@ public class Transit {
         // Treat the stops and their nearest stops as a graph
         // Traverse the graph and assign indexes
         // The time complexity of this operation is O(n)
-        Set<TransitStop> visited = new HashSet<TransitStop>();
-        Stack<TransitStop> stack = new Stack<TransitStop>();
+        Set<TransitStop> visited = new HashSet<>();
+        Stack<TransitStop> stack = new Stack<>();
 
         stack.push(currentStop);
         visited.add(currentStop);
@@ -299,7 +301,7 @@ public class Transit {
             if (stop.getIndex() < 0) {
                 List<TransitStop> discarded = discardedStops.get(this);
                 if (discarded == null) {
-                    discarded = new ArrayList<TransitStop>();
+                    discarded = new ArrayList<>();
                     discardedStops.put(this, discarded);
                 }
                 discarded.add(stop);
@@ -309,6 +311,28 @@ public class Transit {
         }
     }
 
+    /**
+     * A new version rearrange stops
+     *
+     * Since the order of stops absorbed from some data source is incorrect, there's a need to rearrange
+     * the stops of this Transit according to their geographical locations
+     *
+     * The algorithm randomly chooses a stop and looks for its closest stop, and it then iterates to find
+     * the next possible stop that could be connected with an obtuse angle (or alternatively, a right
+     * angle). After this, it goes to one end of the curve connecting stops and marks stops with
+     * ascending index numbers. Finally, it sorts the stops according to their indexes and filters out
+     * all stops that are not needed for this Transit.
+     *
+     * This algorithm is different from the old one in that it searches for the next stop according to
+     * their included angles between vectors connecting the coming stop - current stop - next stop. It also
+     * considers a maximum distance when looking for the next stop and it discards stops that are too far
+     * away and returns them in a set for another computation
+     *
+     * The time complexity of this algorithm is O(n^2) where n is the number of stops of this Transit
+     *
+     * @return a set of stops that cannot be arranged for this Transit (either too far away or the angles
+     * between stops are a little bit too strange)
+     */
     public Set<TransitStop> neoRearrangeStops() {
         // There's no need to compute transits that have none or only one stop
         if (stops.size() <= 1) {
@@ -323,8 +347,8 @@ public class Transit {
             return null;
         }
 
-        Stack<TransitStop> stack = new Stack<TransitStop>();
-        Set<TransitStop> visited = new HashSet<TransitStop>();
+        Stack<TransitStop> stack = new Stack<>();
+        Set<TransitStop> visited = new HashSet<>();
 
         int tryAStop = 0;
         TransitStop currentStop = stops.get(tryAStop++);
@@ -368,6 +392,9 @@ public class Transit {
                     nextStop.setLinkedStopB(currentStop);
                 } else {
                     // how come we find a stop that already has got 2 links?
+                    logger.error("Error happened when rearranging stops for Transit " + name + "; discard this Transit.");
+                    stops.clear();
+                    return null;
                 }
                 stack.push(nextStop);
             } else if (currentStop.getLinkedStopA() == null || currentStop.getLinkedStopB() == null) {
@@ -399,6 +426,9 @@ public class Transit {
                         nextStop.setLinkedStopB(currentStop);
                     } else {
                         // how come we find a stop that already has got 2 links?
+                        logger.error("Error happened when rearranging stops for Transit " + name + "; discard this Transit.");
+                        stops.clear();
+                        return null;
                     }
 
                     visited.add(nextStop);
@@ -449,7 +479,7 @@ public class Transit {
 
         Collections.sort(stops);
 
-        Set<TransitStop> stopsThatIDontNeed = new HashSet<TransitStop>();
+        Set<TransitStop> stopsThatIDontNeed = new HashSet<>();
         for (Iterator<TransitStop> i = stops.iterator(); i.hasNext();) {
             TransitStop s = i.next();
             if (s.getIndex() < 0) {

@@ -34,9 +34,9 @@ public class TransitLineRoute {
 
     public TransitLineRoute(Transit transit, boolean backward) {
         this.duplex = false;
-        this.routeStops = new ArrayList<TransitLineRouteStop>();
-        this.routeLinks = new ArrayList<String>();
-        this.departures = new ArrayList<TransitLineRouteDeparture>();
+        this.routeStops = new ArrayList<>();
+        this.routeLinks = new ArrayList<>();
+        this.departures = new ArrayList<>();
         init(transit, backward);
     }
 
