@@ -40,37 +40,11 @@
       <artifactId>osmosis-tagfilter</artifactId>
       <version>0.44.1</version>
     </dependency>
-
     <dependency>
-      <groupId>org.apache.tomcat.embed</groupId>
-      <artifactId>tomcat-embed-core</artifactId>
-      <version>${tomcat.version}</version>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.17</version>
     </dependency>
-    <dependency>
-      <groupId>org.apache.tomcat.embed</groupId>
-      <artifactId>tomcat-embed-logging-juli</artifactId>
-      <version>${tomcat.version}</version>
-    </dependency>
-    <!--<dependency>-->
-      <!--<groupId>org.apache.tomcat.embed</groupId>-->
-      <!--<artifactId>tomcat-embed-jasper</artifactId>-->
-      <!--<version>${tomcat.version}</version>-->
-    <!--</dependency>-->
-    <!--<dependency>-->
-      <!--<groupId>org.apache.tomcat</groupId>-->
-      <!--<artifactId>tomcat-jasper</artifactId>-->
-      <!--<version>${tomcat.version}</version>-->
-    <!--</dependency>-->
-    <!--<dependency>-->
-      <!--<groupId>org.apache.tomcat</groupId>-->
-      <!--<artifactId>tomcat-jasper-el</artifactId>-->
-      <!--<version>${tomcat.version}</version>-->
-    <!--</dependency>-->
-    <!--<dependency>-->
-      <!--<groupId>org.apache.tomcat</groupId>-->
-      <!--<artifactId>tomcat-jsp-api</artifactId>-->
-      <!--<version>${tomcat.version}</version>-->
-    <!--</dependency>-->
   </dependencies>
 
   <build>
@@ -85,6 +59,39 @@
           <target>1.8</target>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <configuration>
+          <mainClass>com.mitsubishi.simulation.gui.GUIMain</mainClass>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+        <repositories>
+          <repository>
+            <snapshots>
+              <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-matsim-matsim</id>
+            <name>bintray</name>
+            <url>http://dl.bintray.com/matsim/matsim</url>
+          </repository>
+        </repositories>
+        <pluginRepositories>
+          <pluginRepository>
+            <snapshots>
+              <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-matsim-matsim</id>
+            <name>bintray-plugins</name>
+            <url>http://dl.bintray.com/matsim/matsim</url>
+          </pluginRepository>
+        </pluginRepositories>
+        <id>bintray</id>
+    </profile>
+  </profiles>
 </project>

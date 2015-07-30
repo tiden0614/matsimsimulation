@@ -43,12 +43,12 @@ public class OSMRelationTransitAdapter implements TransitAdapter {
      */
     public OSMRelationTransitAdapter(String filename, Network network) {
         this.network = network;
-        this.transits = new ArrayList<Transit>();
-        this.transitStations = new HashMap<Id, TransitStation>();
+        this.transits = new ArrayList<>();
+        this.transitStations = new HashMap<>();
         logger.info("Converting OSMRelations into Transits...");
         try {
             // only extract public transport relations
-            Map<String, Object> filter = new HashMap<String, Object>();
+            Map<String, Object> filter = new HashMap<>();
             filter.put("type", "route");
             filter.put("route", new String[]{Transit.BUS, Transit.TRAIN});
             this.relations = OSMRelation.extractRelationsFromOSMFile(new FileInputStream(filename), filter);
@@ -63,8 +63,8 @@ public class OSMRelationTransitAdapter implements TransitAdapter {
             if (name == null || type == null) {
                 continue;
             }
-            List<Node> forwardNodes = new ArrayList<Node>();
-            List<Node> backwardNodes = new ArrayList<Node>();
+            List<Node> forwardNodes = new ArrayList<>();
+            List<Node> backwardNodes = new ArrayList<>();
             boolean createTwoWayTransits = false;
             for (OSMRelationMember member : relation.getMembers()) {
                 String role = member.getRole();
@@ -111,7 +111,7 @@ public class OSMRelationTransitAdapter implements TransitAdapter {
         Transit t = new Transit(type, name);
         List<TransitStop> stops = t.getStops();
         // cache the stops in case we decide not to add new stops into the map
-        Map<Id, TransitStation> stationsToAdd = new HashMap<Id, TransitStation>();
+        Map<Id, TransitStation> stationsToAdd = new HashMap<>();
         // add stops to the transit
         for (int i = 0; i < nodes.size(); i++) {
             Node node = nodes.get(i);
@@ -165,7 +165,7 @@ public class OSMRelationTransitAdapter implements TransitAdapter {
     }
 
     public List<TransitStation> getTransitStations() {
-        List<TransitStation> transitStationList = new ArrayList<TransitStation>();
+        List<TransitStation> transitStationList = new ArrayList<>();
         transitStationList.addAll(transitStations.values());
         return transitStationList;
     }

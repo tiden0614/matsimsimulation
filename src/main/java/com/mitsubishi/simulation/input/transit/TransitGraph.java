@@ -1,5 +1,6 @@
 package com.mitsubishi.simulation.input.transit;
 
+import com.mitsubishi.simulation.utils.Constants;
 import org.apache.log4j.Logger;
 import org.matsim.core.utils.collections.QuadTree;
 
@@ -23,11 +24,11 @@ public class TransitGraph {
 
     public TransitGraph(Collection<Transit> transits, Collection<TransitStation> stations) {
         // this default distance is about 500 meters in reality
-        this(transits, stations, 0.004521858);
+        this(transits, stations, Constants.get1MForCoordSystem(Transit.ACCEPT_COORD_SYSTEM) * 500);
     }
 
     public TransitGraph(Collection<Transit> transits, Collection<TransitStation> stations, double searchDistance) {
-        this.transits = new HashMap<String, Transit>();
+        this.transits = new HashMap<>();
         this.searchDistance = searchDistance;
         // load transits into the map
         for (Transit transit : transits) {
@@ -54,7 +55,7 @@ public class TransitGraph {
             maxY = Math.max(y, maxY);
         }
 
-        this.stations = new QuadTree<TransitStation>(minX, minY, maxX, maxY);
+        this.stations = new QuadTree<>(minX, minY, maxX, maxY);
 
         // build this quad tree
         for (TransitStation stop : stations) {
@@ -77,7 +78,7 @@ public class TransitGraph {
                         Transfer t = new Transfer(fromTransit, passThroughTransit, stop, stop);
                         List<Transfer> transfers = possibleTransfers.get(passThroughTransit.getName());
                         if (transfers == null) {
-                            transfers = new ArrayList<Transfer>();
+                            transfers = new ArrayList<>();
                             possibleTransfers.put(passThroughTransit.getName(), transfers);
                         }
                         transfers.add(t);
@@ -96,7 +97,7 @@ public class TransitGraph {
                                 TransitStop toStop = nearbyStation.getPassThroughTransitMap().get(toTransit);
                                 Transfer t = new Transfer(fromTransit, toTransit, stop, toStop);
                                 if (transfers == null) {
-                                    transfers = new ArrayList<Transfer>();
+                                    transfers = new ArrayList<>();
                                     possibleTransfers.put(toTransit.getName(), transfers);
                                     transfers.add(t);
                                 } else {

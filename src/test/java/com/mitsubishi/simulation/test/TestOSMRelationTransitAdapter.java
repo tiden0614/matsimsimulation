@@ -21,7 +21,7 @@ public class TestOSMRelationTransitAdapter {
     @Test
     public void testAdapter() {
         Network network = NetworkUtils.convertOSMToNetwork(
-                Constants.OSM_TEST_INPUT, TransformationFactory.WGS84, TransformationFactory.WGS84
+                Constants.OSM_TEST_INPUT, TransformationFactory.WGS84, Transit.ACCEPT_COORD_SYSTEM
         );
         OSMRelationTransitAdapter adapter = new OSMRelationTransitAdapter(Constants.OSM_TEST_INPUT, network);
 

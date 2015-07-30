@@ -18,7 +18,7 @@ public class TransitStation {
     public TransitStation(String name, Node node) {
         this.name = name;
         this.node = node;
-        this.passThroughTransitMap = new HashMap<Transit, TransitStop>();
+        this.passThroughTransitMap = new HashMap<>();
     }
 
     public TransitStation(Node node) {

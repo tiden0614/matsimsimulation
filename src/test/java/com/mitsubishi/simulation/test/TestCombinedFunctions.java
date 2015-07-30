@@ -32,7 +32,7 @@ public class TestCombinedFunctions {
 
     private Scenario scenario;
 
-    @Before
+//    @Before
     public void setup() {
         Config config = ConfigUtils.createConfig();
         this.scenario = ScenarioUtils.createScenario(config);
@@ -62,7 +62,7 @@ public class TestCombinedFunctions {
         return org.matsim.core.network.NetworkUtils.createNetwork();
     }
 
-    @Test
+//    @Test
     public void testCombinedFunction() {
         Network someNetwork = getTransformedNetwork();
 //        Network someNetwork = scenario.getNetwork();
@@ -94,7 +94,7 @@ public class TestCombinedFunctions {
         populationWriter.write(COMBINED_TEST_OUTPUT + File.separator + "population.xml");
     }
 
-    @Test
+//    @Test
     public void testRunScenario() {
         Config config = ConfigUtils.loadConfig(COMBINED_TEST_OUTPUT + File.separator + "config.xml");
         Controler controler = new Controler(config);
