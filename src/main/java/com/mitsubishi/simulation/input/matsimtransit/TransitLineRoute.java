@@ -27,16 +27,22 @@ public class TransitLineRoute {
     private List<String> routeLinks;
     private List<TransitLineRouteDeparture> departures;
     private String id;
+    private int startTime;
+    private int endTime;
+    private int interval;
 
     public static List<StopFacility> getStopFacilities() {
         return stopFacilities;
     }
 
-    public TransitLineRoute(Transit transit, boolean backward) {
+    public TransitLineRoute(Transit transit, boolean backward, int startTime, int endTime, int interval) {
         this.duplex = false;
         this.routeStops = new ArrayList<>();
         this.routeLinks = new ArrayList<>();
         this.departures = new ArrayList<>();
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.interval = interval;
         init(transit, backward);
     }
 
@@ -123,11 +129,7 @@ public class TransitLineRoute {
 
 
         // generate transit departures
-        int firstEmit = 1 * 3600; // 01:00 AM
-        int lastEmit = 23 * 3600; // 12:00 PM
-        int emitInterval = 15 * 60; // emit a transit every 15 minutes
-
-        for (int t = firstEmit; t < lastEmit; t += emitInterval) {
+        for (int t = startTime; t < endTime; t += interval) {
             TransitLineRouteDeparture departure = new TransitLineRouteDeparture(
                     String.valueOf(idGen++),
                     String.format("%02d:%02d:%02d", t / 3600, (t / 60) % 60, t % 60),

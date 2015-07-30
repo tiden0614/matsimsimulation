@@ -1,22 +1,13 @@
 package com.mitsubishi.simulation.input.matsimtransit;
 
-import com.mitsubishi.simulation.input.nlni.NLNIRailwayTransitAdapter;
 import com.mitsubishi.simulation.input.transit.Transit;
-import com.mitsubishi.simulation.input.transit.TransitStop;
-import com.mitsubishi.simulation.utils.Constants;
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Coord;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.collections.Tuple;
-import org.matsim.core.utils.geometry.CoordImpl;
 import org.matsim.core.utils.io.MatsimXmlWriter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Created by tiden on 7/15/2015.
@@ -38,27 +29,29 @@ public class TransitWriter extends MatsimXmlWriter {
     private String vehiclesPath;
     private List<TransitLine> transitLines;
 
-    public TransitWriter(String outputDir, List<Transit> transits) {
+    public TransitWriter(String outputDir, List<Transit> transits, int startTime, int endTime, int interval) {
         this(
                 outputDir + System.getProperty("file.separator") + DEFAULT_SCHEDULE_FILE_NAME,
                 outputDir + System.getProperty("file.separator") + DEFAULT_VEHICLES_FILE_NAME,
-                transits
+                transits,
+                startTime,
+                endTime,
+                interval
         );
     }
 
-    public TransitWriter(String schedulePath, String vehiclesPath, List<Transit> transits) {
+    public TransitWriter(String schedulePath, String vehiclesPath, List<Transit> transits,
+                         int startTime, int endTime, int interval) {
         this.schedulePath = schedulePath;
         this.vehiclesPath = vehiclesPath;
-        this.transitLines = new ArrayList<TransitLine>();
+        this.transitLines = new ArrayList<>();
 
         // build transit lines
-        for (Transit transit : transits) {
-            transitLines.add(new TransitLine(transit));
-        }
+        transitLines.addAll(transits.stream().map(transit -> new TransitLine(transit, startTime, endTime, interval)).collect(Collectors.toList()));
     }
 
     private void writeStopFacility(StopFacility stopFacility) {
-        List<Tuple<String, String>> attrs = new ArrayList<Tuple<String, String>>(5);
+        List<Tuple<String, String>> attrs = new ArrayList<>(5);
         attrs.add(createTuple("id", stopFacility.getId()));
         attrs.add(createTuple("x", stopFacility.getX()));
         attrs.add(createTuple("y", stopFacility.getY()));
@@ -71,7 +64,7 @@ public class TransitWriter extends MatsimXmlWriter {
     }
 
     private void writeStop(TransitLineRouteStop stop) {
-        List<Tuple<String, String>> attrs = new ArrayList<Tuple<String, String>>(3);
+        List<Tuple<String, String>> attrs = new ArrayList<>(3);
         attrs.add(createTuple("refId", stop.getRefId()));
         if (stop.getArrivalOffset() != null) {
             attrs.add(createTuple("arrivalOffset", stop.getArrivalOffset()));
@@ -83,7 +76,7 @@ public class TransitWriter extends MatsimXmlWriter {
     }
 
     private void writeDeparture(TransitLineRouteDeparture departure) {
-        List<Tuple<String, String>> attrs = new ArrayList<Tuple<String, String>>(3);
+        List<Tuple<String, String>> attrs = new ArrayList<>(3);
         attrs.add(createTuple("id", departure.getId()));
         attrs.add(createTuple("departureTime", departure.getDepartureTime()));
         attrs.add(createTuple("vehicleRefId", departure.getVehicleRefId()));
@@ -91,7 +84,7 @@ public class TransitWriter extends MatsimXmlWriter {
     }
 
     private void writeTransitLineRoute(TransitLineRoute route) {
-        List<Tuple<String, String>> attrs = new ArrayList<Tuple<String, String>>();
+        List<Tuple<String, String>> attrs = new ArrayList<>();
 
         // write the open tag for transitRoute
         attrs.add(createTuple("id", route.getId()));
@@ -104,9 +97,7 @@ public class TransitWriter extends MatsimXmlWriter {
 
         // write routProfile
         writeStartTag("routeProfile", null);
-        for (TransitLineRouteStop stop : route.getRouteStops()) {
-            writeStop(stop);
-        }
+        route.getRouteStops().forEach(this::writeStop);
         writeEndTag("routeProfile");
 
         // write route links
@@ -120,9 +111,7 @@ public class TransitWriter extends MatsimXmlWriter {
 
         // write departures
         writeStartTag("departures", null);
-        for (TransitLineRouteDeparture departure : route.getDepartures()) {
-            writeDeparture(departure);
-        }
+        route.getDepartures().forEach(this::writeDeparture);
         writeEndTag("departures");
 
         // write the end tag for transitRoute
@@ -130,7 +119,7 @@ public class TransitWriter extends MatsimXmlWriter {
     }
 
     private void writeTransitLine(TransitLine line) {
-        List<Tuple<String, String>> transitLineIdAttr = new ArrayList<Tuple<String, String>>(1);
+        List<Tuple<String, String>> transitLineIdAttr = new ArrayList<>(1);
         transitLineIdAttr.add(createTuple("id", line.getId()));
         writeStartTag("transitLine", transitLineIdAttr);
 
@@ -153,15 +142,11 @@ public class TransitWriter extends MatsimXmlWriter {
 
         // write transitStops
         writeStartTag("transitStops", null);
-        for (StopFacility facility : TransitLineRoute.getStopFacilities()) {
-            writeStopFacility(facility);
-        }
+        TransitLineRoute.getStopFacilities().forEach(this::writeStopFacility);
         writeEndTag("transitStops");
 
         // write transitLines
-        for (TransitLine line : transitLines) {
-            writeTransitLine(line);
-        }
+        transitLines.forEach(this::writeTransitLine);
 
         writeEndTag("transitSchedule");
         close();
@@ -170,7 +155,7 @@ public class TransitWriter extends MatsimXmlWriter {
     public void writeTransitVehicles() {
         openFile(this.vehiclesPath);
         writeXmlHead();
-        List<Tuple<String, String>> attrs = new ArrayList<Tuple<String, String>>();
+        List<Tuple<String, String>> attrs = new ArrayList<>();
         attrs.add(createTuple("xmlns", "http://www.matsim.org/files/dtd"));
         attrs.add(createTuple("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance"));
         attrs.add(createTuple("xsi:schemaLocation",
@@ -227,18 +212,5 @@ public class TransitWriter extends MatsimXmlWriter {
 
         writeEndTag("vehicleDefinitions");
         close();
-    }
-
-    public static void main(String[] args) {
-        // for test use
-        String source = "NLNIInput/N02-13.xml";
-        String outputDir = "NLNIInput";
-        Network network = NetworkUtils.createNetwork();
-        // confine the area to Tokyo only
-        QuadTree.Rect boundary = new QuadTree.Rect(139.6864, 35.7405, 139.8450, 35.6210);
-        NLNIRailwayTransitAdapter adapter = new NLNIRailwayTransitAdapter(source, network, boundary);
-        TransitWriter writer = new TransitWriter(outputDir, adapter.getTransits());
-        writer.writeTransitSchedule();
-        writer.writeTransitVehicles();
     }
 }

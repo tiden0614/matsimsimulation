@@ -13,21 +13,21 @@ public class TransitLine {
     private int standingRoom;
     private int length;
 
-    public TransitLine(Transit transit) {
+    public TransitLine(Transit transit, int statTime, int endTime, int interval) {
         seats = 50;
         standingRoom = 50;
         length = 50;
-        init(transit);
+        init(transit, statTime, endTime, interval);
     }
 
-    private void init(Transit transit) {
+    private void init(Transit transit, int startTime, int endTime, int interval) {
         setId(transit.getName());
 
-        forwardRoute = new TransitLineRoute(transit, false);
+        forwardRoute = new TransitLineRoute(transit, false, startTime, endTime, interval);
 
         if (transit.isDuplexTransit()) {
             // generate backward transit
-            backwardRoute = new TransitLineRoute(transit, true);
+            backwardRoute = new TransitLineRoute(transit, true, startTime, endTime, interval);
         }
     }
 

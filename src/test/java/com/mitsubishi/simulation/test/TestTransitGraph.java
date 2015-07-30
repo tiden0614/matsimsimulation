@@ -37,9 +37,9 @@ public class TestTransitGraph {
         stops = adapter.getTransitStations();
     }
 
-//    @Test
+    @Test
     public void testTransitGraph() {
-        TransitGraph graph = new TransitGraph(transits, stops, Constants.WGS_DISTANCE_VERY_SMALL);
+        TransitGraph graph = new TransitGraph(transits, stops, Constants.get1MForCoordSystem(Transit.ACCEPT_COORD_SYSTEM) * 10);
 
         Map<String, Transit> transitMap = graph.getTransits();
         assertTrue(transitMap.size() == 6);

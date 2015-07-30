@@ -7,6 +7,7 @@ import com.mitsubishi.simulation.input.nlni.NLNIRailwayTransitAdapter;
 import com.mitsubishi.simulation.input.osm.OSMRelationTransitAdapter;
 import com.mitsubishi.simulation.input.population.PersonGenerator;
 import com.mitsubishi.simulation.input.population.RandomWithinBoundaryPersonGenerator;
+import com.mitsubishi.simulation.input.transit.Transit;
 import com.mitsubishi.simulation.input.transit.TransitAdapter;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
@@ -65,6 +66,7 @@ public class Controller implements Initializable {
 
     private FileChooser fileChooser;
     private DirectoryChooser dirChooser;
+    private Alert warningDialog;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -76,6 +78,7 @@ public class Controller implements Initializable {
         // Init a file chooser
         fileChooser = new FileChooser();
         dirChooser = new DirectoryChooser();
+        warningDialog = new Alert(Alert.AlertType.WARNING, "", ButtonType.OK);
     }
 
     public void onPublicTransportDataSourceButtonAction(ActionEvent actionEvent) {
@@ -100,14 +103,34 @@ public class Controller implements Initializable {
     }
 
     public void onGenerateMATSIMInputButtonAction(ActionEvent actionEvent) {
-        if (!"".equals(outputDirectory.getText())) {
-            File outputDir = new File(outputDirectory.getText());
-            if (!outputDir.exists()) {
-                outputDir.mkdirs();
+        String outputDir = outputDirectory.getText();
+        if ("".equals(outputDir)) {
+            showWarningDialog("Please specify an output directory!");
+            return;
+        } else {
+            File outputFile = Paths.get(outputDir).toFile();
+            if ((outputFile.exists() && outputFile.isFile())) {
+                showWarningDialog("The output directory " + outputDirectory.getText() + " is not a valid path");
+                return;
             }
-            // TODO check the file paths
-            generateInputFiles();
+            if (!outputFile.exists()) {
+                if (!outputFile.mkdirs()) {
+                    showWarningDialog("The output directory " + outputDirectory.getText() + " is not a valid path");
+                    return;
+                }
+            }
         }
+        String ptSrc = publicTransportationDataSource.getText();
+        if ("".equals(ptSrc) || !Paths.get(ptSrc).toFile().exists()) {
+            showWarningDialog("The public transportation input data source " + ptSrc + " is not a valid path");
+            return;
+        }
+        String nSrc = networkDataSource.getText();
+        if ("".equals(nSrc) || !Paths.get(nSrc).toFile().exists()) {
+            showWarningDialog("The network input data source " + nSrc + " is not a valid path");
+            return;
+        }
+        generateInputFiles();
     }
 
     public void onStartSimulationButtonAction(ActionEvent actionEvent) {
@@ -115,7 +138,8 @@ public class Controller implements Initializable {
         File configFile = new File(configPath);
         if (!configFile.exists()) {
             // Warn the user to first generate the inputs
-            new Alert(Alert.AlertType.WARNING, "Please generate the inputs first!", ButtonType.OK).showAndWait();
+//            new Alert(Alert.AlertType.WARNING, "Please generate the inputs first!", ButtonType.OK).showAndWait();
+            showWarningDialog("Please generate the inputs first!");
         } else {
             new Controler(ConfigUtils.loadConfig(configPath)).run();
         }
@@ -186,10 +210,19 @@ public class Controller implements Initializable {
         } else {
             transitAdapter = new OSMRelationTransitAdapter(publicPTSource, scenario.getNetwork());
         }
+        List<Transit> transits = transitAdapter.getTransits();
+
+        // set the speed of transits
+        for (Transit transit : transits) {
+            transit.setSpeed(getTransitSpeed());
+        }
 
         // write the transit schedule file and the transit vehicle file
-        // TODO set the parameters according to the inputs of the user
-        TransitWriter transitWriter = new TransitWriter(outputDir, transitAdapter.getTransits());
+        int transitEmitInterval = getTransitEmitInterval();
+        int transitDepEarliest = getTransitDepEarliest();
+        int transitDepLatest = getTransitDepLatest();
+        TransitWriter transitWriter = new TransitWriter(outputDir, transitAdapter.getTransits(),
+                transitDepEarliest, transitDepLatest, transitEmitInterval);
         transitWriter.writeTransitSchedule();
         transitWriter.writeTransitVehicles();
 
@@ -197,9 +230,13 @@ public class Controller implements Initializable {
         new NetworkWriter(scenario.getNetwork()).write(outputDir + File.separator + "network.xml");
 
         // generate the population
-        // TODO set the times according to the inputs of the user
+        int personDepHomeEarliest = getPopDepHomeEarliest();
+        int personDepHomeLatest = getPopDepHomeLatest();
+        int personDepWorkEarliest = getPopDepWorkEarliest();
+        int personDepWorkLatest = getPopDepWorkLatest();
         PersonGenerator generator = new RandomWithinBoundaryPersonGenerator(scenario, boundary,
-                Integer.valueOf(populationGenerationNumberOfAgents.getText()));
+                Integer.valueOf(populationGenerationNumberOfAgents.getText()),
+                        personDepHomeEarliest, personDepHomeLatest, personDepWorkEarliest, personDepWorkLatest);
 
         for (Person person : generator.getPersons()) {
             scenario.getPopulation().addPerson(person);
@@ -208,5 +245,49 @@ public class Controller implements Initializable {
         // write the population
         new PopulationWriter(scenario.getPopulation(), scenario.getNetwork())
                 .write(outputDir + File.separator + "population.xml");
+    }
+
+    private void showWarningDialog(String warning) {
+        warningDialog.setTitle("Warning");
+        warningDialog.setContentText(warning);
+        warningDialog.showAndWait();
+    }
+
+    private int getTransitEmitInterval() {
+        return Integer.valueOf(publicTransportationEmitInterval.getText()) * 60;
+    }
+
+    private double getTransitSpeed() {
+        return Double.valueOf(publicTransportationSpeed.getText());
+    }
+
+    private int getTransitDepEarliest() {
+        return Integer.valueOf(publicTransportationStartHour.getValue().toString()) * 3600 +
+                Integer.valueOf(publicTransportationStartMinute.getValue().toString()) * 60;
+    }
+
+    private int getTransitDepLatest() {
+        return Integer.valueOf(publicTransportationEndHour.getValue().toString()) * 3600 +
+                Integer.valueOf(publicTransportationEndMinute.getValue().toString()) * 60;
+    }
+
+    private int getPopDepHomeEarliest() {
+        return Integer.valueOf(populationGenerationLeaveHomeStartHour.getValue().toString()) * 3600 +
+                Integer.valueOf(populationGenerationLeaveHomeStartMinute.getValue().toString()) * 60;
+    }
+
+    private int getPopDepHomeLatest() {
+        return Integer.valueOf(populationGenerationLeaveHomeEndHour.getValue().toString()) * 3600 +
+                Integer.valueOf(populationGenerationLeaveHomeEndMinute.getValue().toString()) * 60;
+    }
+
+    private int getPopDepWorkEarliest() {
+        return Integer.valueOf(populationGenerationLeaveWorkStartHour.getValue().toString()) * 3600 +
+                Integer.valueOf(populationGenerationLeaveWorkStartMinute.getValue().toString()) * 60;
+    }
+
+    private int getPopDepWorkLatest() {
+        return Integer.valueOf(populationGenerationLeaveWorkEndHour.getValue().toString()) * 3600 +
+                Integer.valueOf(populationGenerationLeaveWorkEndMinute.getValue().toString()) * 60;
     }
 }

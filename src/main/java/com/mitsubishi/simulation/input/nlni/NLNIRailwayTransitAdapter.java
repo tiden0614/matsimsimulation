@@ -42,8 +42,9 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
 
     private Network network;
 
+    private double oneKM;
+
     private Set<String> trainMode;
-    private Set<String> trainAndCarMode;
     private QuadTree.Rect boundary;
 
     private CoordinateTransformation transformation = new WGS84toCH1903LV03();
@@ -66,10 +67,8 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
         lines = new HashMap<>();
         trainMode = new HashSet<>();
         trainMode.add("train");
-        trainAndCarMode = new HashSet<>();
-        trainAndCarMode.add(TransportMode.car);
-        trainAndCarMode.add("train");
         setValidating(false);
+        oneKM = Constants.get1MForCoordSystem(Transit.ACCEPT_COORD_SYSTEM) * 1000;
 
         logger.info("Starting to load lines and stations from " + inputFile);
 
@@ -245,16 +244,14 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
         for (TransitStop stop : transit.getStops()) {
             TransitStation transitStation = stop.getStation();
             transitStation.getPassThroughTransitMap().put(transit, stop);
-            Set<String> allowedMode = trainMode;
             if (lastStation != null) {
 
                 double distance = lastStation.getDistanceFrom(transitStation);
-                if (distance > Constants.WGS_DISTANCE_1KM * LONG_DISTANCE_FACTOR) {
+                if (distance > oneKM * LONG_DISTANCE_FACTOR) {
                     logger.warn(String.format("Found a super long distance (>%dKM) %.2fKM " +
                             "in line %s between stations %s -> %s", LONG_DISTANCE_FACTOR,
-                            distance / Constants.WGS_DISTANCE_1KM, transit.getName(), lastStation.getName(),
+                            distance / oneKM, transit.getName(), lastStation.getName(),
                             transitStation.getName()));
-                    allowedMode = trainAndCarMode;
                 }
                 // since all data from NLNI are actual duplex trains
                 // add both links from station A to station B and station B to station A
@@ -264,8 +261,8 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
                 Link link2 = network.getFactory().createLink(
                         new IdImpl(getNextId()), transitStation.getNode(), lastStation.getNode()
                 );
-                link1.setAllowedModes(allowedMode);
-                link2.setAllowedModes(allowedMode);
+                link1.setAllowedModes(trainMode);
+                link2.setAllowedModes(trainMode);
                 synchronized (AbstractNLNITransitAdapter.class) {
                     network.addLink(link1);
                     network.addLink(link2);
@@ -277,7 +274,7 @@ public class NLNIRailwayTransitAdapter extends AbstractNLNITransitAdapter {
                 Link linkToSelf = network.getFactory().createLink(
                         new IdImpl(getNextId()), stop.getStation().getNode(), stop.getStation().getNode()
                 );
-                linkToSelf.setAllowedModes(allowedMode);
+                linkToSelf.setAllowedModes(trainMode);
                 synchronized (AbstractNLNITransitAdapter.class) {
                     network.addLink(linkToSelf);
                 }

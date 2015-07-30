@@ -47,25 +47,31 @@ public class RandomWithinBoundaryPersonGenerator implements PersonGenerator {
     private List<Person> persons;
     private int numPersons;
     private Random rand;
+    private int depHomeEarliest;
+    private int depHomeLatest;
+    private int depWorkEarliest;
+    private int depWorkLatest;
 
     public RandomWithinBoundaryPersonGenerator(Scenario scenario, QuadTree.Rect boundary, int numPersons) {
+        this(scenario, boundary, numPersons, 5*3600, 11*3600, 16*3600, 22*3600);
+    }
+
+    public RandomWithinBoundaryPersonGenerator(Scenario scenario, QuadTree.Rect boundary, int numPersons,
+                                               int depHomeEarliest, int depHomeLatest, int depWorkEarliest, int depWorkLatest) {
         this.scenario = scenario;
-//        this.boundary = boundary;
         this.boundary = Constants.convertBoundryToCoordSystem(boundary, Transit.ACCEPT_COORD_SYSTEM);
         this.numPersons = numPersons;
         this.persons = new ArrayList<>();
         this.rand = new Random();
+        this.depHomeEarliest = depHomeEarliest;
+        this.depHomeLatest = depHomeLatest;
+        this.depWorkEarliest = depWorkEarliest;
+        this.depWorkLatest = depWorkLatest;
         generate();
     }
 
     private void generate() {
         NetworkImpl network = (NetworkImpl) scenario.getNetwork();
-        // A person possibly leaves his home from 5 AM to 11 AM
-        int depHomeEarliest = 3600 * 5;
-        int depHomeLatest = 3600 * 11;
-        // A person possibly leaves his work place from 6 PM to 11 PM
-        int depWorkEarliest = 3600 * 18;
-        int depWorkLatest = 3600 * 23;
 
         for (int i = 0; i < numPersons; i++) {
             // generate the home location
